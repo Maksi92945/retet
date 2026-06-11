@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eden · Админ-панель</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<!-- Try the project's full eden-api.js first; if the file 404s the inline
+     fallback below still defines window.EdenAPI with the methods the admin
+     page actually uses. This keeps /admin.html working even if static
+     serving for /eden-api.js is misconfigured. -->
+<script src="eden-api.js" onerror="window.__edenApiMissing = true"></script>
+<script>
+  if (!window.EdenAPI) {
+    /* Inline mini-client: same localStorage keys as the real eden-api.js. */
+    window.EdenAPI = (function () {
+      const TOKEN_KEY = 'eden.token';
+      const USER_KEY  = 'eden.user';
+      function getToken() {
+        return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+      }
+      function getUser() {
+        try {
+          const raw = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+      }
+      function clearToken() {
+        ['eden.token','eden.user'].forEach(k => {
+          localStorage.removeItem(k);
+          sessionStorage.removeItem(k);
+        });
+      }
+      return { getToken, getUser, clearToken };
+    })();
+  }
+</script>
+<style>
+  :root {
+    --bg:           #FAFAFA;
+    --surface:      #FFFFFF;
+    --surface-2:    #F4F4F1;
+    --ink:          #0A0A0A;
+    --fg-muted:     rgba(10,10,10,0.62);
+    --fg-subtle:    rgba(10,10,10,0.42);
+    --border:       rgba(10,10,10,0.08);
+    --border-strong:rgba(10,10,10,0.16);
+    --green:        #15583E;
+    --green-dark:   #0F4530;
+    --green-soft:   #E8F0EA;
+    --serif:        'Instrument Serif', ui-serif, Georgia, serif;
+    --sans:         'Geist', 'Inter', ui-sans-serif, system-ui;
+  }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
+  }
+  .accent { font-family: var(--serif); font-style: italic; color: var(--green); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .btn-primary {
+    background: var(--green); color: #FAFAFA;
+    border-radius: 8px; padding: .55rem 1rem;
+    font-size: 13px; font-weight: 500;
+    transition: background .15s;
+  }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost {
+    border: 1px solid var(--border-strong); color: var(--ink);
+    border-radius: 8px; padding: .55rem 1rem;
+    font-size: 13px; font-weight: 500; background: transparent;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-ghost:hover { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+  .input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: .55rem .75rem;
+    font-size: 13.5px;
+    color: var(--ink);
+    outline: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .input:focus { border-color: var(--green); }
+  .label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    font-size: 10.5px;
+    color: var(--fg-subtle);
+    margin-bottom: .35rem;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .15rem .55rem;
+    border-radius: 9999px;
+    font-size: 10.5px; font-weight: 500;
+    background: var(--green-soft);
+    color: var(--green);
+  }
+  .stat-num { font-family: var(--serif); font-size: 38px; line-height: 1; color: var(--ink); }
+  .row-divider { border-bottom: 1px solid var(--border); }
+  .skeleton {
+    display: inline-block; background: linear-gradient(90deg, rgba(10,10,10,0.04) 25%, rgba(10,10,10,0.08) 37%, rgba(10,10,10,0.04) 63%);
+    background-size: 400% 100%; animation: sk 1.4s ease infinite; border-radius: 4px;
+  }
+  @keyframes sk { 0%{background-position:100% 50%} 100%{background-position:0 50%} }
+</style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ============== HEADER ============== -->
+  <header class="border-b" style="border-color: var(--border)">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center gap-4">
+      <a href="/app.html" class="flex items-center gap-2 text-sm" style="color: var(--fg-muted)">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> К приложению
+      </a>
+      <div class="h-4 w-px" style="background: var(--border)"></div>
+      <div class="flex items-center gap-2">
+        <i data-lucide="shield" class="w-4 h-4" style="color: var(--green)"></i>
+        <span class="font-medium text-[15px]">Админ-панель</span>
+      </div>
+      <span class="pill"><i data-lucide="lock" class="w-2.5 h-2.5"></i> Только для админа</span>
+      <div class="ml-auto text-[12.5px]" style="color: var(--fg-muted)">
+        <span id="adminEmail">…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============== LOGIN GATE ============== -->
+  <section id="loginGate" class="hidden max-w-md mx-auto px-6 py-16">
+    <div class="card p-8 text-center">
+      <i data-lucide="lock-keyhole" class="w-8 h-8 mx-auto mb-4" style="color: var(--green)"></i>
+      <h2 class="text-[20px] font-medium mb-2">Нужен вход</h2>
+      <p class="text-[13px] mb-5" style="color: var(--fg-muted)">
+        Залогинься в Eden под admin email’ом, чтобы попасть сюда.
+      </p>
+      <a href="/signin.html?return=/admin.html" class="btn-primary inline-flex items-center gap-2">
+        <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Войти
+      </a>
+    </div>
+  </section>
+
+  <!-- ============== PASSWORD GATE ============== -->
+  <section id="passwordGate" class="hidden max-w-md mx-auto px-6 py-16">
+    <div class="card p-8">
+      <div class="text-center mb-5">
+        <i data-lucide="key-round" class="w-8 h-8 mx-auto mb-3" style="color: var(--green)"></i>
+        <h2 class="text-[20px] font-medium mb-1">Пароль админ-панели</h2>
+        <p class="text-[13px]" style="color: var(--fg-muted)">
+          Дополнительный пароль помимо логина. Задан в <code class="text-[12px] px-1.5 py-0.5 rounded" style="background: var(--surface-2)">ADMIN_PASSWORD</code> в <code>backend/.env</code>.
+        </p>
+      </div>
+      <form id="passForm" class="space-y-3">
+        <label class="label">Пароль</label>
+        <input id="passInput" type="password" class="input" autocomplete="current-password" autofocus required />
+        <div id="passError" class="text-[12px] hidden" style="color: #B91C1C"></div>
+        <button type="submit" id="passSubmit" class="btn-primary w-full flex items-center justify-center gap-2 mt-4">
+          <i data-lucide="unlock" class="w-3.5 h-3.5"></i> Открыть админку
+        </button>
+      </form>
+      <p class="text-[11.5px] mt-4 text-center" style="color: var(--fg-subtle)">
+        Залогинен как: <span id="passUserEmail" class="font-mono"></span>
+        · <a href="/app.html" style="color: var(--green)">сменить аккаунт</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============== FORBIDDEN ============== -->
+  <section id="forbidden" class="hidden max-w-md mx-auto px-6 py-16">
+    <div class="card p-8 text-center">
+      <i data-lucide="shield-off" class="w-8 h-8 mx-auto mb-4" style="color: #B91C1C"></i>
+      <h2 class="text-[20px] font-medium mb-2">Доступ запрещён</h2>
+      <p class="text-[13px] mb-2" style="color: var(--fg-muted)">
+        Этот email не в списке админов. Добавь его в <code class="text-[12px] px-1.5 py-0.5 rounded" style="background: var(--surface-2)">ADMIN_EMAILS</code> в <code>backend/.env</code>.
+      </p>
+      <p class="text-[12.5px] mt-4" style="color: var(--fg-muted)">
+        Залогинен как: <span id="forbiddenEmail" class="font-mono"></span>
+      </p>
+      <a href="/app.html" class="btn-ghost mt-5 inline-flex items-center gap-2">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Назад в приложение
+      </a>
+    </div>
+  </section>
+
+  <!-- ============== SERVER ERROR ============== -->
+  <section id="serverError" class="hidden max-w-md mx-auto px-6 py-16">
+    <div class="card p-8 text-center">
+      <i data-lucide="server-crash" class="w-8 h-8 mx-auto mb-4" style="color: #B91C1C"></i>
+      <h2 class="text-[20px] font-medium mb-2">Сервер не отвечает</h2>
+      <p class="text-[13px] mb-2" style="color: var(--fg-muted)" id="serverErrorMsg"></p>
+      <p class="text-[12px] mt-4" style="color: var(--fg-subtle)">
+        Перезапусти backend:
+        <code class="text-[11.5px] px-1.5 py-0.5 rounded block mt-2" style="background: var(--surface-2)">pm2 restart alma-backend</code>
+        <span class="block mt-1">или для локалки: <code class="text-[11.5px] px-1.5 py-0.5 rounded" style="background: var(--surface-2)">cd backend && npm start</code></span>
+      </p>
+      <button onclick="location.reload()" class="btn-ghost mt-5 inline-flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Обновить
+      </button>
+    </div>
+  </section>
+
+  <!-- ============== FATAL FALLBACK (если JS упал так рано, что даже showOnly не отработал) ============== -->
+  <section id="fatalFallback" class="hidden max-w-md mx-auto px-6 py-16">
+    <div class="card p-8">
+      <div class="text-center mb-4">
+        <i data-lucide="alert-triangle" class="w-8 h-8 mx-auto mb-3" style="color: #B45309"></i>
+        <h2 class="text-[20px] font-medium mb-1">Что-то пошло не так</h2>
+        <p class="text-[13px]" style="color: var(--fg-muted)">JS упал ещё до инициализации страницы.</p>
+      </div>
+      <pre id="fatalMsg" class="text-[11.5px] p-3 rounded overflow-auto max-h-56 whitespace-pre-wrap break-words" style="background: var(--surface-2); color: var(--ink); font-family: ui-monospace, monospace;"></pre>
+      <div class="text-[12px] mt-4" style="color: var(--fg-muted)">
+        Вероятная причина:
+        <ul class="list-disc ml-5 mt-1 space-y-0.5">
+          <li>backend не перезапущен — нет endpoint’ов <code>/api/admin/*</code></li>
+          <li>в браузере кэширован старый <code>admin.html</code> или <code>eden-api.js</code> (Hard refresh: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>)</li>
+          <li>сайт открыт не на том порту (см. URL в адресной строке)</li>
+        </ul>
+      </div>
+      <button onclick="location.reload()" class="btn-ghost mt-4 inline-flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Перезагрузить
+      </button>
+    </div>
+  </section>
+
+  <!-- ============== MAIN ============== -->
+  <main id="mainPanel" class="hidden max-w-6xl mx-auto px-6 py-8 space-y-6">
+
+    <!-- STATS -->
+    <section>
+      <h2 class="text-[11px] uppercase tracking-[0.2em] mb-3" style="color: var(--fg-subtle)">Пользователи</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="card p-5">
+          <div class="text-[11px] mb-2" style="color: var(--fg-muted)">Всего</div>
+          <div id="statTotal" class="stat-num"><span class="skeleton w-12 h-7 inline-block">&nbsp;</span></div>
+        </div>
+        <div class="card p-5">
+          <div class="text-[11px] mb-2" style="color: var(--fg-muted)">Подтверждённых</div>
+          <div id="statVerified" class="stat-num"><span class="skeleton w-12 h-7 inline-block">&nbsp;</span></div>
+        </div>
+        <div class="card p-5">
+          <div class="text-[11px] mb-2" style="color: var(--fg-muted)">За 7 дней</div>
+          <div id="statWeek" class="stat-num"><span class="skeleton w-12 h-7 inline-block">&nbsp;</span></div>
+        </div>
+        <div class="card p-5">
+          <div class="text-[11px] mb-2" style="color: var(--fg-muted)">За сутки</div>
+          <div id="statDay" class="stat-num"><span class="skeleton w-12 h-7 inline-block">&nbsp;</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT USERS -->
+    <section class="card overflow-hidden">
+      <div class="px-5 py-3 row-divider flex items-center justify-between">
+        <div class="text-[13px] font-medium">Последние регистрации</div>
+        <button id="refreshStats" class="btn-ghost text-[12px] !py-1 !px-2.5 flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3 h-3"></i> Обновить
+        </button>
+      </div>
+      <div id="recentTable" class="text-[13px]">
+        <div class="px-5 py-6 text-center" style="color: var(--fg-muted)">Загружаю…</div>
+      </div>
+    </section>
+
+    <!-- AI ENGINE CONFIG -->
+    <section class="card p-6">
+      <h2 class="text-[11px] uppercase tracking-[0.2em] mb-3" style="color: var(--fg-subtle)">AI движок</h2>
+      <div class="flex items-baseline gap-2 mb-1">
+        <div class="text-[17px] font-medium">Ключ для всех пользователей</div>
+        <span id="cfgStatus" class="pill hidden"><i data-lucide="check" class="w-2.5 h-2.5"></i> Активен</span>
+      </div>
+      <p class="text-[12.5px] mb-6" style="color: var(--fg-muted)">
+        Один API-ключ — работает для каждого, кто заходит в Eden. Никто из пользователей его не видит.
+      </p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div>
+          <label class="label">Провайдер</label>
+          <select id="cfgEngine" class="input cursor-pointer">
+            <option value="groq">Groq (бесплатно, очень быстрый)</option>
+            <option value="openai">OpenAI (GPT-4o, GPT-4o-mini, …)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="openai-compat">OpenAI-совместимый (DeepSeek, Together, …)</option>
+            <option value="ollama">Ollama (локально)</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Модель</label>
+          <input id="cfgModel" class="input" placeholder="например llama-3.3-70b-versatile" />
+        </div>
+        <div class="lg:col-span-2">
+          <label class="label">Base URL</label>
+          <input id="cfgBaseUrl" class="input" placeholder="https://api.groq.com/openai/v1" />
+        </div>
+        <div class="lg:col-span-2">
+          <label class="label">API Key</label>
+          <div class="relative">
+            <input id="cfgApiKey" class="input pr-20" type="password" placeholder="оставь пустым, чтобы не менять" />
+            <button type="button" id="cfgKeyToggle" class="absolute top-1/2 -translate-y-1/2 right-2 text-[11px] px-2 py-1" style="color: var(--fg-subtle)">Показать</button>
+          </div>
+          <div id="cfgKeyState" class="text-[11.5px] mt-1.5" style="color: var(--fg-muted)"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mt-6 pt-5 row-divider" style="border-top: 1px solid var(--border); border-bottom: none">
+        <button id="cfgSaveBtn" class="btn-primary flex items-center gap-2">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i> Сохранить
+        </button>
+        <span id="cfgSaveStatus" class="text-[12px]" style="color: var(--fg-muted)"></span>
+      </div>
+    </section>
+
+    <!-- SUBSCRIPTIONS -->
+    <section class="card p-6">
+      <h2 class="text-[11px] uppercase tracking-[0.2em] mb-3" style="color: var(--fg-subtle)">Подписки и токены</h2>
+      <div class="flex items-baseline gap-2 mb-5">
+        <div class="text-[17px] font-medium">Применение лимитов к существующим юзерам</div>
+      </div>
+
+      <!-- Live summary of plans + current vs catalog caps -->
+      <div id="subsSummary" class="rounded-md border overflow-hidden mb-6" style="border-color: var(--border)">
+        <div class="grid grid-cols-12 gap-3 px-4 py-2.5 text-[10.5px] uppercase tracking-wider" style="color: var(--fg-subtle); background: var(--surface-2)">
+          <div class="col-span-3">Тариф</div>
+          <div class="col-span-2 text-right">Юзеров</div>
+          <div class="col-span-3 text-right">Сейчас в БД</div>
+          <div class="col-span-3 text-right">Из каталога</div>
+          <div class="col-span-1 text-right">⚑</div>
+        </div>
+        <div id="subsSummaryRows" class="text-[13px]">
+          <div class="px-4 py-6 text-center" style="color: var(--fg-muted)">Загружаю…</div>
+        </div>
+      </div>
+
+      <!-- Action 1: migrate caps -->
+      <div class="border rounded-lg p-5 mb-4" style="border-color: var(--border)">
+        <div class="flex items-start gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-md grid place-items-center" style="background: var(--green-soft); color: var(--green)">
+            <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[14px] font-medium mb-1">Применить текущие лимиты планов ко всем подписчикам</div>
+            <div class="text-[12.5px] mb-3" style="color: var(--fg-muted)">
+              Берёт <code style="background: var(--surface-2); padding: 1px 5px; border-radius: 4px">PLANS.daily</code> из <code style="background: var(--surface-2); padding: 1px 5px; border-radius: 4px">backend/lib/billing.js</code> и обновляет <code style="background: var(--surface-2); padding: 1px 5px; border-radius: 4px">tokens_daily</code> у всех АКТИВНЫХ юзеров. Баланс пополняется до нового кэпа, если он был ниже. Истёкшие подписки не трогаются.
+            </div>
+            <button id="migrateCapsBtn" class="btn-primary flex items-center gap-2">
+              <i data-lucide="rocket" class="w-3.5 h-3.5"></i> Применить лимиты сейчас
+            </button>
+            <span id="migrateCapsStatus" class="text-[12px] ml-3" style="color: var(--fg-muted)"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action 2: extend subscriptions -->
+      <div class="border rounded-lg p-5" style="border-color: var(--border)">
+        <div class="flex items-start gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-md grid place-items-center" style="background: var(--green-soft); color: var(--green)">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[14px] font-medium mb-1">Продлить активные подписки</div>
+            <div class="text-[12.5px] mb-3" style="color: var(--fg-muted)">
+              Прибавляет N дней ко всем неистёкшим подпискам. Удобно при сбое биллинга или для извинения за инцидент. Free и истёкшие — не трогаются.
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="extendDays" type="number" min="1" max="365" value="30" class="input" style="width: 110px"/>
+              <span class="text-[12.5px]" style="color: var(--fg-muted)">дней</span>
+              <select id="extendPlan" class="input cursor-pointer" style="width: 200px">
+                <option value="all">Все платные тарифы</option>
+                <option value="pro">Только Pro</option>
+                <option value="starter">Только Старт</option>
+                <option value="studio">Только Студия</option>
+              </select>
+              <button id="extendBtn" class="btn-ghost flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Продлить
+              </button>
+              <span id="extendStatus" class="text-[12px]" style="color: var(--fg-muted)"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS — find one, grant tokens, downgrade, block/unblock -->
+    <section class="card p-6">
+      <h2 class="text-[11px] uppercase tracking-[0.2em] mb-3" style="color: var(--fg-subtle)">Пользователи</h2>
+      <div class="text-[17px] font-medium mb-1">Найти и управлять отдельным юзером</div>
+      <p class="text-[12.5px] mb-5" style="color: var(--fg-muted)">
+        Поиск по email или нику. После выбора — кнопки: выдать токены, понизить до Free, забанить.
+      </p>
+
+      <!-- Search -->
+      <div class="relative mb-3">
+        <input id="usrSearch" type="text" class="input pr-9" placeholder="email или ник, минимум 2 символа…" autocomplete="off" />
+        <i data-lucide="search" class="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2" style="color: var(--fg-subtle)"></i>
+      </div>
+      <div id="usrResults" class="rounded-md border overflow-hidden mb-4 hidden" style="border-color: var(--border)"></div>
+
+      <!-- Selected user card -->
+      <div id="usrSelected" class="hidden">
+        <div class="rounded-lg p-5 mb-4" style="background: var(--surface-2); border: 1px solid var(--border)">
+          <div class="flex items-start gap-4 mb-3">
+            <div class="shrink-0 w-10 h-10 rounded-md grid place-items-center font-medium" style="background: var(--green-soft); color: var(--green)" id="usrInitials">??</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="usrEmail" class="font-mono text-[13.5px] font-medium"></span>
+                <span id="usrStatusPill" class="pill"></span>
+                <span id="usrPlanPill"   class="pill" style="background: var(--green-soft); color: var(--green)"></span>
+              </div>
+              <div id="usrMeta" class="text-[11.5px] mt-1" style="color: var(--fg-muted)"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-[12px]" style="color: var(--fg-muted)">
+            <div><div class="text-[10px] uppercase tracking-wider mb-0.5" style="color: var(--fg-subtle)">Баланс</div><div id="usrBalance" class="font-mono" style="color: var(--ink)">—</div></div>
+            <div><div class="text-[10px] uppercase tracking-wider mb-0.5" style="color: var(--fg-subtle)">Лимит/день</div><div id="usrDaily" class="font-mono" style="color: var(--ink)">—</div></div>
+            <div><div class="text-[10px] uppercase tracking-wider mb-0.5" style="color: var(--fg-subtle)">Всего использовано</div><div id="usrUsedTotal" class="font-mono" style="color: var(--ink)">—</div></div>
+          </div>
+        </div>
+
+        <!-- Action: Grant tokens -->
+        <div class="border rounded-lg p-4 mb-3" style="border-color: var(--border)">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="gift" class="w-4 h-4" style="color: var(--green)"></i>
+            <div class="text-[13.5px] font-medium">Выдать токены</div>
+          </div>
+          <div class="text-[12px] mb-3" style="color: var(--fg-muted)">
+            Добавляет токены к балансу сразу. Если указать «дней» &gt; 0 — также поднимает дневной кэп и продлевает подписку на это число дней.
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="grantTokens" type="number" min="1" max="10000000" value="200000" class="input" style="width: 140px"/>
+            <span class="text-[12px]" style="color: var(--fg-muted)">токенов</span>
+            <input id="grantDays" type="number" min="0" max="365" value="0" class="input" style="width: 100px"/>
+            <span class="text-[12px]" style="color: var(--fg-muted)">дней (0 = разовый)</span>
+            <button id="grantBtn" class="btn-primary flex items-center gap-2">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Выдать
+            </button>
+            <span id="grantStatus" class="text-[12px]" style="color: var(--fg-muted)"></span>
+          </div>
+        </div>
+
+        <!-- Action: Downgrade to free -->
+        <div class="border rounded-lg p-4 mb-3" style="border-color: var(--border)">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="arrow-down-circle" class="w-4 h-4" style="color: #B45309"></i>
+            <div class="text-[13.5px] font-medium">Понизить до Free</div>
+          </div>
+          <div class="text-[12px] mb-3" style="color: var(--fg-muted)">
+            Сбрасывает подписку, токены и срок. AI становится недоступен. Доступ к аккаунту остаётся.
+          </div>
+          <button id="downgradeBtn" class="btn-ghost flex items-center gap-2" style="color: #B45309; border-color: rgba(180,83,9,0.35)">
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> Понизить
+          </button>
+          <span id="downgradeStatus" class="text-[12px] ml-3" style="color: var(--fg-muted)"></span>
+        </div>
+
+        <!-- Action: Block/Unblock -->
+        <div class="border rounded-lg p-4" style="border-color: var(--border)">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="ban" class="w-4 h-4" style="color: #B91C1C"></i>
+            <div class="text-[13.5px] font-medium">Бан аккаунта</div>
+          </div>
+          <div class="text-[12px] mb-3" style="color: var(--fg-muted)">
+            Полностью блокирует логин и API. На N дней (0 = бессрочно). Снимается отдельной кнопкой ниже.
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <input id="banDays" type="number" min="0" max="3650" value="30" class="input" style="width: 100px"/>
+            <span class="text-[12px]" style="color: var(--fg-muted)">дней (0 = бессрочно)</span>
+            <input id="banReason" type="text" maxlength="200" class="input flex-1" style="min-width: 220px" placeholder="причина (видна в audit-логе)"/>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="blockBtn" class="btn-ghost flex items-center gap-2" style="color: #B91C1C; border-color: rgba(185,28,28,0.35)">
+              <i data-lucide="ban" class="w-3.5 h-3.5"></i> Забанить
+            </button>
+            <button id="unblockBtn" class="btn-ghost flex items-center gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i> Снять бан
+            </button>
+            <span id="blockStatus" class="text-[12px] ml-2" style="color: var(--fg-muted)"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="text-center text-[11px] mt-4" style="color: var(--fg-subtle)">
+      Eden Admin · <span id="serverTime"></span>
+    </p>
+  </main>
+
+<script>
+  /* Engine presets — base URL + default model + key hint. */
+  const PRESETS = {
+    'groq':          { url: 'https://api.groq.com/openai/v1',     model: 'llama-3.3-70b-versatile', keyHint: 'console.groq.com — бесплатный быстрый llama' },
+    'openai':        { url: 'https://api.openai.com/v1',          model: 'gpt-4o-mini',             keyHint: 'platform.openai.com/api-keys' },
+    'anthropic':     { url: 'https://api.anthropic.com/v1',       model: 'claude-3-5-sonnet-latest',keyHint: 'console.anthropic.com/settings/keys' },
+    'gemini':        { url: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-1.5-flash', keyHint: 'aistudio.google.com/apikey' },
+    'openai-compat': { url: '',                                   model: '',                        keyHint: 'для DeepSeek/Together/Fireworks/etc.' },
+    'ollama':        { url: 'http://localhost:11434',             model: 'llama3.2',                keyHint: 'локально — ключ не нужен' },
+  };
+
+  const $ = id => document.getElementById(id);
+  function show(el) { el.classList.remove('hidden'); }
+  function hide(el) { el.classList.add('hidden'); }
+  function showOnly(id) {
+    ['loginGate','passwordGate','forbidden','serverError','mainPanel']
+      .forEach(x => $(x)?.classList.add('hidden'));
+    $(id)?.classList.remove('hidden');
+  }
+
+  const PASS_KEY = 'eden.admin.passToken';
+  const getPassToken = () => localStorage.getItem(PASS_KEY) || '';
+  const setPassToken = (t) => localStorage.setItem(PASS_KEY, t);
+  const dropPassToken = () => localStorage.removeItem(PASS_KEY);
+
+  function adminFetch(url, opts = {}) {
+    const headers = Object.assign({}, opts.headers || {}, {
+      Authorization: 'Bearer ' + EdenAPI.getToken(),
+    });
+    const pt = getPassToken();
+    if (pt) headers['X-Admin-Pass'] = 'Bearer ' + pt;
+    return fetch(url, { ...opts, headers });
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      if (sameDay) return 'сегодня · ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }) +
+             ' · ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    } catch { return iso; }
+  }
+
+  function relTime(iso) {
+    if (!iso) return '';
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60)    return 'только что';
+    if (diff < 3600)  return Math.floor(diff / 60)    + ' мин назад';
+    if (diff < 86400) return Math.floor(diff / 3600)  + ' ч назад';
+    if (diff < 604800)return Math.floor(diff / 86400) + ' дн назад';
+    return fmtDate(iso);
+  }
+
+  /* ---- Bootstrap: check auth → admin email → admin password ---- */
+  async function init() {
+    const token = EdenAPI.getToken();
+    const me = EdenAPI.getUser();
+
+    if (!token || !me?.email) {
+      showOnly('loginGate');
+      lucide.createIcons();
+      return;
+    }
+    $('adminEmail').textContent = me.email;
+
+    // Probe /api/admin/stats. Possible responses:
+    //   200 — admin email + pass token valid → show panel
+    //   401 — token expired or missing       → show login
+    //   403 + admin_password_required        → show password gate
+    //   403 + Admin only                     → show forbidden
+    //   404 — backend doesn't have admin endpoints (old code running) → show server error
+    //   network failure                      → show server error
+    let res;
+    try {
+      res = await adminFetch('/api/admin/stats');
+    } catch (e) {
+      $('serverErrorMsg').textContent = 'Бэкенд не отвечает (' + (e.message || 'network') + ').';
+      showOnly('serverError');
+      lucide.createIcons();
+      return;
+    }
+
+    if (res.status === 401) {
+      // Token bad → drop pass token too (it's now useless) and ask for login.
+      dropPassToken();
+      showOnly('loginGate');
+      lucide.createIcons();
+      return;
+    }
+    if (res.status === 404) {
+      $('serverErrorMsg').textContent = 'Endpoint /api/admin/stats не найден. Бэкенд работает на старой версии — перезапусти его.';
+      showOnly('serverError');
+      lucide.createIcons();
+      return;
+    }
+    if (res.status === 403) {
+      let body = {};
+      try { body = await res.json(); } catch (_) {}
+      if (body.error === 'admin_password_required') {
+        dropPassToken();
+        $('passUserEmail').textContent = me.email;
+        setupPasswordForm();
+        showOnly('passwordGate');
+        lucide.createIcons();
+        return;
+      }
+      $('forbiddenEmail').textContent = me.email;
+      showOnly('forbidden');
+      lucide.createIcons();
+      return;
+    }
+    if (!res.ok) {
+      $('serverErrorMsg').textContent = `HTTP ${res.status} — что-то пошло не так на сервере.`;
+      showOnly('serverError');
+      lucide.createIcons();
+      return;
+    }
+
+    let data;
+    try { data = await res.json(); }
+    catch (e) {
+      $('serverErrorMsg').textContent = 'Сервер вернул не-JSON ответ.';
+      showOnly('serverError');
+      lucide.createIcons();
+      return;
+    }
+    showOnly('mainPanel');
+    renderStats(data);
+    await loadAIConfig();
+    await loadSubscriptions();
+    setupEvents();
+    lucide.createIcons();
+  }
+
+  async function loadSubscriptions() {
+    try {
+      const r = await adminFetch('/api/admin/subscriptions/summary');
+      if (!r.ok) return;
+      const j = await r.json();
+      const rows = $('subsSummaryRows');
+      if (!j.plans || !j.plans.length) {
+        rows.innerHTML = '<div class="px-4 py-6 text-center" style="color: var(--fg-muted)">Пока никто не подписался.</div>';
+        return;
+      }
+      const fmt = (n) => Number(n||0).toLocaleString('ru-RU').replace(/,/g,' ');
+      rows.innerHTML = j.plans.map(p => `
+        <div class="grid grid-cols-12 gap-3 px-4 py-3 row-divider items-center">
+          <div class="col-span-3 flex items-center gap-2">
+            <span class="font-medium">${escape(p.label || p.plan)}</span>
+            ${p.trials ? `<span class="pill" style="background: var(--green-soft); color: var(--green)"><i data-lucide="clock" class="w-2.5 h-2.5"></i> ${p.trials} trial</span>` : ''}
+          </div>
+          <div class="col-span-2 text-right font-mono">${p.users}</div>
+          <div class="col-span-3 text-right font-mono">${fmt(p.currentDaily)}</div>
+          <div class="col-span-3 text-right font-mono">${p.catalogDaily != null ? fmt(p.catalogDaily) : '—'}</div>
+          <div class="col-span-1 text-right">
+            ${p.outdated
+              ? '<span class="pill" style="background: rgba(245,158,11,0.12); color: #B45309" title="Не совпадает с каталогом"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i></span>'
+              : '<span style="color: var(--green)">✓</span>'}
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    } catch (e) { console.warn('subs summary load failed:', e); }
+  }
+
+  function setupPasswordForm() {
+    const form = $('passForm');
+    if (form.dataset.bound) return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pw = $('passInput').value;
+      const btn = $('passSubmit');
+      const err = $('passError');
+      err.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Проверяю…';
+      lucide.createIcons();
+      try {
+        const r = await fetch('/api/admin/unlock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + EdenAPI.getToken(),
+          },
+          body: JSON.stringify({ password: pw }),
+        });
+        if (r.status === 401) {
+          err.textContent = 'Неверный пароль';
+          err.classList.remove('hidden');
+          return;
+        }
+        if (r.status === 403) {
+          err.textContent = 'Этот аккаунт не в списке админов';
+          err.classList.remove('hidden');
+          return;
+        }
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          err.textContent = j.error || `HTTP ${r.status}`;
+          err.classList.remove('hidden');
+          return;
+        }
+        const j = await r.json();
+        setPassToken(j.passToken);
+        $('passInput').value = '';
+        // Re-run init now that we have the pass token.
+        init();
+      } catch (e) {
+        err.textContent = 'Сеть недоступна';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="unlock" class="w-3.5 h-3.5"></i> Открыть админку';
+        lucide.createIcons();
+      }
+    });
+  }
+
+  function renderStats(data) {
+    $('statTotal').textContent    = data.users?.total    ?? 0;
+    $('statVerified').textContent = data.users?.verified ?? 0;
+    $('statWeek').textContent     = data.users?.last7d   ?? 0;
+    $('statDay').textContent      = data.users?.last24h  ?? 0;
+    $('serverTime').textContent   = 'данные на ' + fmtDate(data.serverTime);
+
+    const rows = data.recent || [];
+    if (!rows.length) {
+      $('recentTable').innerHTML = '<div class="px-5 py-6 text-center" style="color: var(--fg-muted)">Пока никто не зарегистрировался.</div>';
+      return;
+    }
+    $('recentTable').innerHTML = `
+      <div class="grid grid-cols-12 gap-3 px-5 py-2.5 text-[10.5px] uppercase tracking-wider" style="color: var(--fg-subtle); border-bottom: 1px solid var(--border)">
+        <div class="col-span-5">Email</div>
+        <div class="col-span-3">Ник</div>
+        <div class="col-span-2">Создан</div>
+        <div class="col-span-2 text-right">Статус</div>
+      </div>
+      ${rows.map(u => `
+        <div class="grid grid-cols-12 gap-3 px-5 py-3 row-divider items-center hover:bg-[var(--surface-2)] transition">
+          <div class="col-span-5 truncate font-mono text-[12.5px]">${escape(u.email)}</div>
+          <div class="col-span-3 truncate">${escape(u.nick || '—')}</div>
+          <div class="col-span-2 text-[12px]" style="color: var(--fg-muted)" title="${escape(fmtDate(u.created_at))}">${escape(relTime(u.created_at))}</div>
+          <div class="col-span-2 text-right">
+            ${u.verified
+              ? '<span class="pill"><i data-lucide="check" class="w-2.5 h-2.5"></i>verified</span>'
+              : '<span class="pill" style="background: rgba(245,158,11,0.12); color: #B45309;"><i data-lucide="clock" class="w-2.5 h-2.5"></i>pending</span>'}
+          </div>
+        </div>`).join('')}
+    `;
+    lucide.createIcons();
+  }
+
+  function escape(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  async function loadAIConfig() {
+    try {
+      const r = await adminFetch('/api/admin/ai-config');
+      if (!r.ok) return;
+      const cfg = await r.json();
+      $('cfgEngine').value  = cfg.engine || 'groq';
+      $('cfgBaseUrl').value = cfg.baseUrl || PRESETS[cfg.engine]?.url || '';
+      $('cfgModel').value   = cfg.model   || PRESETS[cfg.engine]?.model || '';
+      $('cfgApiKey').value  = '';
+      if (cfg.hasKey) {
+        $('cfgStatus').classList.remove('hidden');
+        $('cfgKeyState').textContent = `Ключ задан (оканчивается на ${cfg.keyTail}). Поле пустое — старый ключ сохранится.`;
+      } else {
+        $('cfgKeyState').textContent = 'Ключ ещё не задан — вставь его, чтобы AI заработал.';
+        $('cfgKeyState').style.color = '#B45309';
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function setupEvents() {
+    $('cfgEngine').addEventListener('change', () => {
+      const p = PRESETS[$('cfgEngine').value];
+      if (p) {
+        $('cfgBaseUrl').value = p.url;
+        $('cfgModel').value   = p.model;
+      }
+    });
+
+    $('cfgKeyToggle').addEventListener('click', () => {
+      const i = $('cfgApiKey');
+      const t = $('cfgKeyToggle');
+      i.type = i.type === 'password' ? 'text' : 'password';
+      t.textContent = i.type === 'password' ? 'Показать' : 'Скрыть';
+    });
+
+    $('cfgSaveBtn').addEventListener('click', async () => {
+      const body = {
+        engine:  $('cfgEngine').value,
+        baseUrl: $('cfgBaseUrl').value.trim(),
+        model:   $('cfgModel').value.trim(),
+        apiKey:  $('cfgApiKey').value.trim(),
+      };
+      if (!body.baseUrl || !body.model) {
+        $('cfgSaveStatus').textContent = '⚠ Заполни Base URL и Модель';
+        $('cfgSaveStatus').style.color = '#B91C1C';
+        return;
+      }
+      $('cfgSaveBtn').disabled = true;
+      $('cfgSaveStatus').textContent = 'Сохраняю…';
+      $('cfgSaveStatus').style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/ai-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'ошибка');
+        $('cfgSaveStatus').textContent = '✓ Сохранено — AI работает для всех пользователей';
+        $('cfgSaveStatus').style.color = 'var(--green)';
+        $('cfgApiKey').value = '';
+        loadAIConfig();
+      } catch (e) {
+        $('cfgSaveStatus').textContent = '✕ ' + e.message;
+        $('cfgSaveStatus').style.color = '#B91C1C';
+      } finally {
+        $('cfgSaveBtn').disabled = false;
+      }
+    });
+
+    $('refreshStats').addEventListener('click', async () => {
+      $('refreshStats').disabled = true;
+      try {
+        const r = await adminFetch('/api/admin/stats');
+        if (r.ok) renderStats(await r.json());
+      } finally {
+        $('refreshStats').disabled = false;
+      }
+    });
+
+    /* ---- Subscriptions: migrate caps ---- */
+    $('migrateCapsBtn').addEventListener('click', async () => {
+      const ok = confirm(
+        'Это обновит tokens_daily у ВСЕХ активных подписчиков по текущему каталогу планов. ' +
+        'Баланс пополнится до нового кэпа, если был ниже. Продолжить?'
+      );
+      if (!ok) return;
+      const btn = $('migrateCapsBtn');
+      const status = $('migrateCapsStatus');
+      btn.disabled = true;
+      status.textContent = 'Применяю…';
+      status.style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/subscriptions/migrate-caps', { method: 'POST' });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        const total = Object.values(j.applied || {}).reduce((s, x) => s + (x.changed || 0), 0);
+        status.textContent = `✓ Обновлено ${total} юзер${total === 1 ? 'а' : total > 4 ? 'ов' : 'ов'}`;
+        status.style.color = 'var(--green)';
+        await loadSubscriptions();   // refresh table
+      } catch (e) {
+        status.textContent = '✕ ' + e.message;
+        status.style.color = '#B91C1C';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    /* ---- Users: search ---- */
+    let currentUser = null;
+    let searchTimer = null;
+    function debounce(fn, ms) {
+      return (...a) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => fn(...a), ms); };
+    }
+    const fmtNum = (n) => Number(n || 0).toLocaleString('ru-RU').replace(/,/g, ' ');
+
+    async function searchUsers(q) {
+      const list = $('usrResults');
+      if (!q || q.length < 2) {
+        list.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      try {
+        const r = await adminFetch('/api/admin/users/search?q=' + encodeURIComponent(q));
+        if (!r.ok) return;
+        const j = await r.json();
+        if (!j.results || !j.results.length) {
+          list.innerHTML = '<div class="px-4 py-3 text-[12.5px]" style="color: var(--fg-muted)">Ничего не нашлось.</div>';
+          list.classList.remove('hidden');
+          return;
+        }
+        list.innerHTML = j.results.map(u => `
+          <button type="button" data-pick="${escape(u.email)}" class="w-full text-left px-4 py-2.5 row-divider hover:bg-[var(--surface-2)] transition flex items-center gap-3">
+            <div class="font-mono text-[12.5px] truncate flex-1">${escape(u.email)}</div>
+            <span class="pill ${u.blocked ? '' : ''}" style="${u.blocked ? 'background:rgba(185,28,28,0.10);color:#B91C1C' : ''}">${u.blocked ? 'banned' : (u.subscription || 'free')}</span>
+            <span class="font-mono text-[11px]" style="color: var(--fg-muted)">${fmtNum(u.tokens_balance)} / ${fmtNum(u.tokens_daily)}</span>
+          </button>
+        `).join('');
+        list.classList.remove('hidden');
+        list.querySelectorAll('[data-pick]').forEach(b => {
+          b.addEventListener('click', () => selectUser(b.dataset.pick));
+        });
+        lucide.createIcons();
+      } catch (e) { /* ignore */ }
+    }
+
+    async function selectUser(email) {
+      $('usrResults').classList.add('hidden');
+      $('usrSearch').value = email;
+      try {
+        const r = await adminFetch('/api/admin/users/' + encodeURIComponent(email));
+        if (!r.ok) return;
+        const u = await r.json();
+        currentUser = u;
+        $('usrEmail').textContent = u.email;
+        $('usrInitials').textContent = (u.nick || u.email).slice(0, 2).toUpperCase();
+        // Status pill
+        const stPill = $('usrStatusPill');
+        if (u.blocked) {
+          stPill.textContent = u.blocked_until ? `banned until ${new Date(u.blocked_until).toISOString().slice(0,10)}` : 'banned';
+          stPill.style.background = 'rgba(185,28,28,0.10)';
+          stPill.style.color = '#B91C1C';
+        } else if (u.verified) {
+          stPill.textContent = 'verified';
+          stPill.style.background = 'var(--green-soft)';
+          stPill.style.color = 'var(--green)';
+        } else {
+          stPill.textContent = 'pending';
+          stPill.style.background = 'rgba(245,158,11,0.12)';
+          stPill.style.color = '#B45309';
+        }
+        // Plan pill
+        const plPill = $('usrPlanPill');
+        plPill.textContent = (u.is_trial ? 'trial · ' : '') + (u.subscription || 'free');
+        $('usrMeta').textContent = (u.nick ? `nick: ${u.nick}` : '') +
+          (u.last_seen ? ` · last seen ${u.last_seen}` : '') +
+          (u.plan_expires_at ? ` · истекает ${new Date(u.plan_expires_at).toISOString().slice(0,10)}` : '');
+        $('usrBalance').textContent   = fmtNum(u.tokens_balance);
+        $('usrDaily').textContent     = fmtNum(u.tokens_daily);
+        $('usrUsedTotal').textContent = fmtNum(u.tokens_used_total);
+        $('usrSelected').classList.remove('hidden');
+        ['grantStatus','downgradeStatus','blockStatus'].forEach(id => $(id).textContent = '');
+        lucide.createIcons();
+      } catch (e) { /* ignore */ }
+    }
+
+    $('usrSearch').addEventListener('input', debounce(() => searchUsers($('usrSearch').value.trim()), 220));
+    $('usrSearch').addEventListener('focus', () => {
+      if ($('usrResults').innerHTML) $('usrResults').classList.remove('hidden');
+    });
+
+    /* ---- Users: grant tokens ---- */
+    $('grantBtn').addEventListener('click', async () => {
+      if (!currentUser) return;
+      const tokens = parseInt($('grantTokens').value, 10) || 0;
+      const days   = parseInt($('grantDays').value, 10) || 0;
+      if (tokens < 1) { $('grantStatus').textContent = '⚠ Сколько токенов?'; $('grantStatus').style.color = '#B91C1C'; return; }
+      const ok = confirm(`Выдать ${fmtNum(tokens)} токенов юзеру ${currentUser.email}` + (days ? ` и продлить подписку на ${days} дн.?` : '?'));
+      if (!ok) return;
+      $('grantBtn').disabled = true;
+      $('grantStatus').textContent = 'Выдаю…';
+      $('grantStatus').style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/users/grant', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email, tokens, days }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        $('grantStatus').textContent = `✓ Новый баланс: ${fmtNum(j.newBalance)}`;
+        $('grantStatus').style.color = 'var(--green)';
+        await selectUser(currentUser.email);
+      } catch (e) {
+        $('grantStatus').textContent = '✕ ' + e.message;
+        $('grantStatus').style.color = '#B91C1C';
+      } finally { $('grantBtn').disabled = false; }
+    });
+
+    /* ---- Users: downgrade ---- */
+    $('downgradeBtn').addEventListener('click', async () => {
+      if (!currentUser) return;
+      if (!confirm(`Понизить ${currentUser.email} до Free? Подписка и токены будут сброшены.`)) return;
+      $('downgradeBtn').disabled = true;
+      $('downgradeStatus').textContent = 'Понижаю…';
+      $('downgradeStatus').style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/users/downgrade', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        $('downgradeStatus').textContent = '✓ Понижено до Free';
+        $('downgradeStatus').style.color = 'var(--green)';
+        await selectUser(currentUser.email);
+        await loadSubscriptions();
+      } catch (e) {
+        $('downgradeStatus').textContent = '✕ ' + e.message;
+        $('downgradeStatus').style.color = '#B91C1C';
+      } finally { $('downgradeBtn').disabled = false; }
+    });
+
+    /* ---- Users: block / unblock ---- */
+    async function doBlock() {
+      if (!currentUser) return;
+      const days   = parseInt($('banDays').value, 10) || 0;
+      const reason = $('banReason').value.trim();
+      const dur = days === 0 ? 'БЕССРОЧНО' : `на ${days} дн.`;
+      if (!confirm(`Забанить ${currentUser.email} ${dur}?`)) return;
+      $('blockBtn').disabled = true;
+      $('blockStatus').textContent = 'Баню…';
+      $('blockStatus').style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/users/block', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email, days, reason }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        $('blockStatus').textContent = '✓ Забанен';
+        $('blockStatus').style.color = '#B91C1C';
+        await selectUser(currentUser.email);
+      } catch (e) {
+        $('blockStatus').textContent = '✕ ' + e.message;
+        $('blockStatus').style.color = '#B91C1C';
+      } finally { $('blockBtn').disabled = false; }
+    }
+    async function doUnblock() {
+      if (!currentUser) return;
+      if (!confirm(`Снять бан с ${currentUser.email}?`)) return;
+      $('unblockBtn').disabled = true;
+      $('blockStatus').textContent = 'Снимаю бан…';
+      $('blockStatus').style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/users/unblock', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        $('blockStatus').textContent = '✓ Бан снят';
+        $('blockStatus').style.color = 'var(--green)';
+        await selectUser(currentUser.email);
+      } catch (e) {
+        $('blockStatus').textContent = '✕ ' + e.message;
+        $('blockStatus').style.color = '#B91C1C';
+      } finally { $('unblockBtn').disabled = false; }
+    }
+    $('blockBtn').addEventListener('click', doBlock);
+    $('unblockBtn').addEventListener('click', doUnblock);
+
+    /* ---- Subscriptions: extend ---- */
+    $('extendBtn').addEventListener('click', async () => {
+      const days = parseInt($('extendDays').value, 10) || 0;
+      const plan = $('extendPlan').value;
+      if (days < 1 || days > 365) {
+        $('extendStatus').textContent = '⚠ От 1 до 365 дней';
+        $('extendStatus').style.color = '#B91C1C';
+        return;
+      }
+      const planLabel = plan === 'all' ? 'всем платным тарифам' : `тарифу «${plan}»`;
+      const ok = confirm(`Продлить активные подписки ${planLabel} на ${days} дн.?`);
+      if (!ok) return;
+      const btn = $('extendBtn');
+      const status = $('extendStatus');
+      btn.disabled = true;
+      status.textContent = 'Продлеваю…';
+      status.style.color = 'var(--fg-muted)';
+      try {
+        const r = await adminFetch('/api/admin/subscriptions/extend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ days, plan }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'не удалось');
+        status.textContent = `✓ Продлено ${j.affected} подписк${j.affected === 1 ? 'а' : j.affected > 4 ? 'ок' : 'и'} на ${days} дн.`;
+        status.style.color = 'var(--green)';
+        await loadSubscriptions();
+      } catch (e) {
+        status.textContent = '✕ ' + e.message;
+        status.style.color = '#B91C1C';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  /* Global fail-safe: if anything throws before init() finishes,
+     surface it on-screen instead of leaving the user with a white page. */
+  function showFatal(msg) {
+    try {
+      ['loginGate','passwordGate','forbidden','serverError','mainPanel'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+      const f = document.getElementById('fatalFallback');
+      const m = document.getElementById('fatalMsg');
+      if (m) m.textContent = String(msg);
+      f?.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    } catch (_) {
+      // Last-resort textual message
+      document.body.innerHTML =
+        '<pre style="padding:24px; font-family:monospace; color:#0A0A0A; background:#FAFAFA;">' +
+        'Eden admin · fatal: ' + String(msg) + '</pre>';
+    }
+  }
+
+  window.addEventListener('error', (e) => {
+    showFatal(e.message + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''));
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    showFatal('Unhandled rejection: ' + (e.reason?.message || e.reason));
+  });
+
+  /* Run init with its own safety net. EdenAPI is always defined now
+     (either from eden-api.js or the inline fallback at the top of <head>). */
+  (async () => {
+    try { await init(); }
+    catch (e) {
+      console.error('[admin init]', e);
+      showFatal(e.message || String(e));
+    }
+  })();
+</script>
+</body>
+</html>

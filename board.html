@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alma — Board</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script defer src="/cookie-banner.js"></script>
+<script src="eden-api.js"></script>
+<style>
+  :root {
+    --bg:           #FAFAFA;
+    --surface:      #FFFFFF;
+    --ink:          #0A0A0A;
+    --fg:           #0A0A0A;
+    --fg-muted:     rgba(10,10,10,0.62);
+    --fg-subtle:    rgba(10,10,10,0.42);
+    --fg-faint:     rgba(10,10,10,0.22);
+    --border:       rgba(10,10,10,0.08);
+    --border-strong:rgba(10,10,10,0.18);
+    --green:        #15583E;
+    --green-dark:   #0F4530;
+    --green-soft:   #E8F0EA;
+    --green-faint:  #F0F4F1;
+    --serif:        'Instrument Serif', ui-serif, Georgia, serif;
+    --sans:         'Geist', 'Inter', ui-sans-serif, system-ui;
+    --mono:         'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease:         cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { color-scheme: light; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    letter-spacing: -0.011em;
+    min-height: 100vh;
+  }
+  .accent { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+  .font-mono { font-family: var(--mono); font-feature-settings: 'tnum'; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--fg-subtle); font-weight: 500;
+  }
+  .noise::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.04;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .55rem .95rem; border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    transition: background-color .22s var(--ease), color .22s var(--ease), border-color .22s var(--ease);
+    line-height: 1;
+  }
+  .btn-primary { background: var(--green); color: #FAFAFA; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color .18s var(--ease);
+  }
+  .item-card:hover { border-color: var(--border-strong); }
+  ::selection { background: var(--green); color: #FAFAFA; }
+
+  /* ===== Background FX ===== */
+  body { overflow-x: hidden; position: relative; }
+  .fx-aurora { position: fixed; inset: 0; z-index: -3; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(72px); will-change: transform; }
+  .blob.b1 { width: 56vw; height: 56vw; max-width: 640px; max-height: 640px;
+    background: radial-gradient(circle at 30% 30%, rgba(45,158,110,0.18), transparent 68%);
+    top: -20%; left: -10%; animation: drift1 28s var(--ease) infinite alternate; }
+  .blob.b2 { width: 48vw; height: 48vw; max-width: 560px; max-height: 560px;
+    background: radial-gradient(circle at 60% 40%, rgba(21,88,62,0.14), transparent 70%);
+    top: 4%; right: -14%; animation: drift2 34s var(--ease) infinite alternate; }
+  @keyframes drift1 { to { transform: translate(12%, 14%) scale(1.12); } }
+  @keyframes drift2 { to { transform: translate(-10%, 12%) scale(1.10); } }
+  .fx-grid {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(10,10,10,0.026) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10,10,10,0.026) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(ellipse 92% 55% at 50% 0%, #000 0%, transparent 78%);
+            mask-image: radial-gradient(ellipse 92% 55% at 50% 0%, #000 0%, transparent 78%);
+  }
+  .fx-spot {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 10%), rgba(21,88,62,0.06), transparent 42%);
+  }
+  .shimmer {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    background: linear-gradient(108deg, var(--green) 36%, #2D9E6E 50%, var(--green) 64%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: shimmerMove 7s linear infinite;
+  }
+  @keyframes shimmerMove { to { background-position: -220% 0; } }
+  .item-card { transition: border-color .18s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease); }
+  .item-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -22px rgba(15,69,48,0.28); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+
+  #toast {
+    position: fixed; top: 20px; left: 50%; transform: translate(-50%, -10px);
+    padding: 10px 16px; border-radius: 8px;
+    background: var(--ink); color: #FAFAFA;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; pointer-events: none; transition: all .22s var(--ease);
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body class="noise">
+
+<!-- Background FX -->
+<div class="fx-aurora" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span>
+</div>
+<div class="fx-grid" aria-hidden="true"></div>
+<div class="fx-spot" aria-hidden="true"></div>
+
+<div id="toast"></div>
+
+<header class="px-6 lg:px-10 h-14 border-b border-[var(--border)] flex items-center">
+  <div class="max-w-[1200px] mx-auto w-full flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <svg class="alma-logo" width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Alma">
+        <rect width="32" height="32" rx="7.5" fill="#15583E"/>
+        <path d="M9 22.5 L16 9 L23 22.5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M11.7 17.3 L20.3 17.3" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M19.5 22.3 L20.15 20.75 L21.7 20.1 L20.15 19.45 L19.5 17.9 L18.85 19.45 L17.3 20.1 L18.85 20.75 Z" fill="#FFFFFF"/>
+      </svg>
+      <span class="font-medium text-[14.5px] tracking-tight text-[var(--ink)]">Alma</span>
+    </a>
+    <a href="/signin.html?mode=signup" class="btn btn-primary !text-xs">Создать свой board</a>
+  </div>
+</header>
+
+<main class="max-w-[860px] mx-auto px-6 lg:px-10 py-14">
+
+  <!-- Loading state -->
+  <div id="loading" class="text-center py-20 text-[var(--fg-subtle)] text-sm">
+    Загружаю board…
+  </div>
+
+  <!-- Error state -->
+  <div id="errorState" class="hidden text-center py-20">
+    <div class="text-4xl mb-3">🔒</div>
+    <div class="text-lg font-medium tracking-tight" id="errorMsg">Board не найден</div>
+    <p class="text-sm text-[var(--fg-muted)] mt-2">Возможно ссылка устарела, board стал приватным или его удалили.</p>
+    <a href="/" class="btn btn-ghost mt-6">На главную</a>
+  </div>
+
+  <!-- Board view -->
+  <div id="boardView" class="hidden">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="eyebrow">Public board</span>
+      <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+      <span class="text-[11px] text-[var(--fg-faint)] font-mono" id="boardOwner"></span>
+    </div>
+
+    <h1 class="text-3xl md:text-4xl font-medium tracking-tight mb-3" id="boardTitle"></h1>
+    <p class="text-[15px] text-[var(--fg-muted)] leading-relaxed max-w-[600px]" id="boardDescription"></p>
+
+    <div class="flex items-center gap-4 mt-6 mb-10 text-[12px] text-[var(--fg-subtle)] font-mono">
+      <span id="boardItemCount"></span>
+      <span class="text-[var(--fg-faint)]">·</span>
+      <span id="boardDate"></span>
+      <button type="button" id="copyLinkBtn" class="ml-auto btn btn-ghost !text-xs !py-1.5">
+        <i data-lucide="link" class="w-3 h-3"></i> Copy link
+      </button>
+    </div>
+
+    <div id="itemsList" class="space-y-2.5"></div>
+
+    <div class="mt-16 pt-8 border-t border-[var(--border)] text-center">
+      <p class="text-[var(--fg-muted)] text-sm mb-4">
+        <span class="shimmer text-[18px]">Хочешь создать свой такой же?</span>
+      </p>
+      <a href="/signin.html?mode=signup" class="btn btn-primary">Создать аккаунт</a>
+      <p class="text-[11px] text-[var(--fg-faint)] mt-4 font-mono">7 дней бесплатно · без карты</p>
+    </div>
+  </div>
+</main>
+
+<script>
+  lucide.createIcons();
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.addEventListener('pointermove', (e) => {
+      document.body.style.setProperty('--mx', e.clientX + 'px');
+      document.body.style.setProperty('--my', e.clientY + 'px');
+    }, { passive: true });
+  }
+  const toast = document.getElementById('toast');
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  const slug = location.pathname.replace(/^\/board\//, '').split('/')[0];
+  const ICONS = { note: 'sticky-note', url: 'link', post: 'file-text', idea: 'lightbulb', creator: 'user' };
+
+  async function load() {
+    if (!slug) { showError('Нет slug в URL'); return; }
+    try {
+      const r = await EdenAPI.boardsPublic(slug);
+      const b = r.board;
+      const items = r.items || [];
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('boardView').classList.remove('hidden');
+      document.title = `${b.title} — Alma`;
+      document.getElementById('boardTitle').textContent = b.title;
+      document.getElementById('boardDescription').textContent = b.description || '';
+      document.getElementById('boardOwner').textContent = `by ${b.ownerNick}`;
+      document.getElementById('boardItemCount').textContent = `${items.length} ${items.length === 1 ? 'item' : 'items'}`;
+      document.getElementById('boardDate').textContent = (b.createdAt || '').slice(0, 10);
+
+      if (!items.length) {
+        document.getElementById('itemsList').innerHTML =
+          '<div class="text-center py-12 text-[var(--fg-subtle)] text-sm italic">Создатель ещё ничего не добавил.</div>';
+        return;
+      }
+
+      document.getElementById('itemsList').innerHTML = items.map(it => {
+        const p = it.payload || {};
+        const txt = p.text || p.url || (p.handle ? '@' + p.handle : '(empty)');
+        const isUrl = it.kind === 'url' && /^https?:/.test(txt);
+        return `
+          <div class="item-card p-4 flex items-start gap-3">
+            <i data-lucide="${ICONS[it.kind] || 'circle'}" class="w-4 h-4 text-[var(--green)] mt-0.5 shrink-0"></i>
+            <div class="min-w-0 flex-1 text-[14.5px] leading-relaxed">
+              ${isUrl
+                ? `<a href="${esc(txt)}" target="_blank" rel="noopener" class="text-[var(--green)] underline break-all">${esc(txt)}</a>`
+                : esc(txt)}
+            </div>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] shrink-0 mt-1">${esc(it.kind)}</span>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    } catch (err) {
+      showError(err.message || 'Не удалось загрузить board');
+    }
+  }
+  function showError(msg) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('errorState').classList.remove('hidden');
+    document.getElementById('errorMsg').textContent = msg;
+  }
+  document.getElementById('copyLinkBtn').addEventListener('click', () => {
+    navigator.clipboard?.writeText(location.href);
+    showToast('Ссылка скопирована');
+  });
+  load();
+</script>
+</body>
+</html>

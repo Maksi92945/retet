@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alma — A research studio for creators.</title>
+<meta name="description" content="Find proven ideas. Make them sound like you. A research studio for creators, solopreneurs and marketers." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/i18n.js"></script>
+<style>
+  :root {
+    /* Surfaces */
+    --bg:           #FAFAFA;
+    --surface:      #F4F4F1;
+    --surface-2:    #EFEFEC;
+    --ink:          #0A0A0A;
+    --ink-warm:     #14130F;
+
+    /* Foreground */
+    --fg:           #0A0A0A;
+    --fg-muted:     rgba(10,10,10,0.62);
+    --fg-subtle:    rgba(10,10,10,0.42);
+    --fg-faint:     rgba(10,10,10,0.22);
+
+    /* Borders */
+    --border:       rgba(10,10,10,0.08);
+    --border-strong:rgba(10,10,10,0.18);
+
+    /* Brand — deep forest green */
+    --green:        #15583E;
+    --green-dark:   #0F4530;
+    --green-mid:    #1F7A55;
+    --green-bright: #2D9E6E;
+    --green-soft:   #E8F0EA;
+    --green-faint:  #F0F4F1;
+
+    /* Type */
+    --serif:        'Instrument Serif', ui-serif, Georgia, serif;
+    --sans:         'Geist', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono:         'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease:         cubic-bezier(0.32, 0.72, 0, 1);
+  } 
+
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  /* No `scroll-behavior: smooth` here — it fights the native trackpad smoothing on macOS
+     and makes wheel scroll feel sluggish. Anchor links still jump instantly which is fine. */
+  html { color-scheme: light; }
+  body {
+    font-family: var(--sans);
+    font-feature-settings: 'cv11','ss01','ss03';
+    background: var(--bg);
+    color: var(--fg);
+    letter-spacing: -0.011em;
+    line-height: 1.5;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb { background: rgba(10,10,10,0.08); border-radius: 9999px; }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(10,10,10,0.18); }
+
+  .font-serif { font-family: var(--serif); }
+  .font-mono  { font-family: var(--mono); font-feature-settings: 'tnum','ss01'; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  .text-green { color: var(--green); }
+  .bg-green { background: var(--green); }
+  .bg-green-soft { background: var(--green-soft); }
+  .text-ink { color: var(--ink); }
+
+  /* Headlines */
+  .display { font-weight: 500; letter-spacing: -0.035em; line-height: 1.02; }
+  .h2 { font-weight: 500; letter-spacing: -0.028em; line-height: 1.05; }
+
+  /* Eyebrow */
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--fg-subtle); font-weight: 500;
+  }
+
+  /* ============== BACKGROUND FX LAYERS ============== */
+  /* Animated aurora — drifting green light blooms */
+  .fx-aurora { position: fixed; inset: 0; z-index: -3; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
+  .blob.b1 { width: 60vw; height: 60vw; max-width: 720px; max-height: 720px;
+    background: radial-gradient(circle at 30% 30%, rgba(45,158,110,0.20), transparent 68%);
+    top: -16%; left: -10%; animation: drift1 26s var(--ease) infinite alternate; }
+  .blob.b2 { width: 52vw; height: 52vw; max-width: 640px; max-height: 640px;
+    background: radial-gradient(circle at 60% 40%, rgba(21,88,62,0.18), transparent 70%);
+    top: 8%; right: -14%; animation: drift2 32s var(--ease) infinite alternate; }
+  .blob.b3 { width: 48vw; height: 48vw; max-width: 560px; max-height: 560px;
+    background: radial-gradient(circle at 50% 50%, rgba(31,122,85,0.14), transparent 72%);
+    bottom: -18%; left: 24%; animation: drift3 38s var(--ease) infinite alternate; }
+  @keyframes drift1 { to { transform: translate(14%, 12%) scale(1.12); } }
+  @keyframes drift2 { to { transform: translate(-12%, 16%) scale(1.08); } }
+  @keyframes drift3 { to { transform: translate(8%, -14%) scale(1.15); } }
+
+  /* Fading grid */
+  .fx-grid {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(10,10,10,0.028) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10,10,10,0.028) 1px, transparent 1px);
+    background-size: 68px 68px;
+    -webkit-mask-image: radial-gradient(ellipse 92% 58% at 50% 0%, #000 0%, transparent 78%);
+            mask-image: radial-gradient(ellipse 92% 58% at 50% 0%, #000 0%, transparent 78%);
+  }
+
+  /* Mouse spotlight */
+  .fx-spot {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 12%), rgba(21,88,62,0.07), transparent 42%);
+    transition: opacity .4s var(--ease);
+  }
+
+  /* Subtle paper noise on white */
+  .noise::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.05;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .6rem 1rem; border-radius: 6px;
+    font-size: 13.5px; font-weight: 500; letter-spacing: -0.005em;
+    transition: background-color .22s var(--ease), color .22s var(--ease), border-color .22s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+    line-height: 1; white-space: nowrap; position: relative; overflow: hidden;
+  }
+  .btn-primary { background: var(--green); color: #FAFAFA; box-shadow: 0 1px 2px rgba(15,69,48,0.18), 0 8px 24px -8px rgba(15,69,48,0.30); }
+  .btn-primary:hover { background: var(--green-dark); box-shadow: 0 1px 2px rgba(15,69,48,0.20), 0 14px 34px -10px rgba(15,69,48,0.45); }
+  /* moving shine on primary */
+  .btn-primary::after {
+    content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.28), transparent);
+    transform: skewX(-18deg); transition: none;
+  }
+  .btn-primary:hover::after { animation: shine .9s var(--ease); }
+  @keyframes shine { to { left: 140%; } }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border-strong); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  .btn-text { background: transparent; color: var(--fg-muted); padding-left: 0; padding-right: 0; }
+  .btn-text:hover { color: var(--green); }
+  .btn-sm { padding: .42rem .8rem; font-size: 12.5px; }
+  .btn-dark { background: var(--ink); color: #FAFAFA; }
+  .btn-dark:hover { background: #1c1c1c; }
+  .magnetic { transition: transform .2s var(--ease), background-color .22s var(--ease), box-shadow .25s var(--ease); }
+
+  /* Hairlines */
+  .hr-t { border-top: 1px solid var(--border); }
+  .grad-divider { height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--border-strong), transparent); }
+
+  /* Surface card */
+  .surface { background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px; }
+
+  /* Link */
+  .link { color: var(--fg-muted); transition: color .22s var(--ease); text-decoration: none; }
+  .link:hover { color: var(--green); }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal[data-delay="1"] { transition-delay: .07s; }
+  .reveal[data-delay="2"] { transition-delay: .14s; }
+  .reveal[data-delay="3"] { transition-delay: .21s; }
+  .reveal[data-delay="4"] { transition-delay: .28s; }
+  .reveal[data-delay="5"] { transition-delay: .35s; }
+
+  /* Scroll progress — green gradient */
+  #scrollProgress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--green-bright));
+    z-index: 70; width: 0%; transition: width .12s linear;
+    box-shadow: 0 0 12px rgba(45,158,110,0.5);
+  }
+
+  /* Serif italic accent — green brand signature */
+  .accent { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; color: var(--green); }
+
+  /* Animated gradient-shimmer accent */
+  .shimmer {
+    font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em;
+    background: linear-gradient(108deg, var(--green) 36%, var(--green-bright) 50%, var(--green) 64%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: shimmerMove 7s linear infinite;
+  }
+  @keyframes shimmerMove { to { background-position: -220% 0; } }
+
+  /* ============== i18n — show only one language at a time ============== */
+  html[lang="en"] .i18n-ru,
+  html[lang="ru"] .i18n-en { display: none !important; }
+  /* Subtle language switcher in nav */
+  .lang-switch {
+    display: inline-flex; align-items: center;
+    border: 1px solid var(--border-strong); border-radius: 6px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+    overflow: hidden;
+  }
+  .lang-switch [data-lang-btn] {
+    padding: 4px 9px; color: var(--fg-muted); cursor: pointer;
+    background: transparent; transition: background-color .2s var(--ease), color .2s var(--ease);
+  }
+  .lang-switch [data-lang-btn]:hover { color: var(--ink); }
+  .lang-switch [data-lang-btn].active { background: var(--green); color: #FAFAFA; }
+
+  /* Mobile menu */
+  .mobile-menu { transform: translateX(100%); transition: transform .35s var(--ease); }
+  .mobile-menu.open { transform: translateX(0); }
+
+  /* Dark product window */
+  .ui-window-dark {
+    background: linear-gradient(180deg, #141414, #0A0A0A);
+    border: 1px solid rgba(10,10,10,0.12); color: #FAFAFA;
+    border-radius: 12px; overflow: hidden; position: relative;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -20px rgba(10,10,10,0.22), 0 2px 8px rgba(10,10,10,0.06);
+  }
+  /* green halo behind the window */
+  .ui-window-wrap { position: relative; }
+  .ui-window-wrap::before {
+    content: ''; position: absolute; inset: -14% -8% -22% -8%; z-index: -1; border-radius: 30px;
+    background: radial-gradient(60% 60% at 50% 40%, rgba(45,158,110,0.28), transparent 70%);
+    filter: blur(8px);
+  }
+
+  /* Featured pricing — green inverted */
+  .price-featured { background: var(--green); color: #FAFAFA; border: 1px solid var(--green);
+    box-shadow: 0 30px 70px -24px rgba(15,69,48,0.55); }
+  .price-featured .btn-primary { background: #FAFAFA; color: var(--green); box-shadow: none; }
+  .price-featured .btn-primary:hover { background: #ECECEC; }
+
+  /* Section labels */
+  .sec-label { display: flex; align-items: center; gap: .75rem; }
+  .sec-num { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+
+  /* Card with hairline + glow + lift */
+  .card-hl { background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px;
+    transition: border-color .25s var(--ease), background-color .25s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease); }
+  .card-hl:hover { border-color: var(--border-strong); }
+
+  /* Interactive glow card (cursor-follow highlight) */
+  .glow-card { position: relative; isolation: isolate; }
+  .glow-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: -1; opacity: 0;
+    background: radial-gradient(280px circle at var(--gx, 50%) var(--gy, 50%), rgba(45,158,110,0.12), transparent 60%);
+    transition: opacity .35s var(--ease);
+  }
+  .glow-card:hover::before { opacity: 1; }
+  .lift:hover { transform: translateY(-4px); box-shadow: 0 20px 44px -22px rgba(15,69,48,0.30); }
+
+  /* Dropdown */
+  .has-dropdown:hover .dropdown, .has-dropdown:focus-within .dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+  .dropdown { opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .2s var(--ease), transform .2s var(--ease), visibility .2s; }
+
+  /* Stats grid */
+  .stat-cell { padding: 1.6rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background-color .3s var(--ease); position: relative; }
+  .stat-cell:last-child { border-right: 0; }
+  .stat-cell:hover { background: var(--green-faint); }
+
+  /* Number prefix */
+  .lead-num { font-family: var(--mono); color: var(--green); font-size: 11px; letter-spacing: 0.04em; font-weight: 500; }
+
+  /* Live badge */
+  .badge-live { display:inline-flex; align-items:center; gap:.4rem; }
+  .badge-live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-bright); box-shadow: 0 0 0 0 rgba(45,158,110,0.6); animation: pulse 2s var(--ease) infinite; }
+  @keyframes pulse { 0%{ box-shadow: 0 0 0 0 rgba(45,158,110,0.55);} 70%{ box-shadow: 0 0 0 8px rgba(45,158,110,0);} 100%{ box-shadow: 0 0 0 0 rgba(45,158,110,0);} }
+
+  /* Marquee */
+  .marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .marquee-track { display: flex; gap: 14px; width: max-content; animation: scrollLeft 38s linear infinite; }
+  .marquee-track.rev { animation: scrollRight 44s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  @keyframes scrollLeft { to { transform: translateX(-50%); } }
+  @keyframes scrollRight { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+  .hook-chip {
+    display: inline-flex; align-items: center; gap: .6rem; flex: none;
+    padding: .6rem .95rem; border-radius: 9px; background: #FFFFFF;
+    border: 1px solid var(--border); font-size: 13px; color: var(--fg-muted);
+    transition: border-color .25s var(--ease), color .25s var(--ease);
+  }
+  .hook-chip:hover { border-color: var(--green); color: var(--ink); }
+  .hook-chip .mult { font-family: var(--mono); font-size: 11px; color: var(--green); font-weight: 600; }
+
+  /* SVG draw-on animation */
+  .draw-path { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); transition: stroke-dashoffset 2.4s var(--ease); }
+  .drawn .draw-path { stroke-dashoffset: 0; }
+
+  /* Floating */
+  .float-a { animation: floatA 9s ease-in-out infinite; }
+  .float-b { animation: floatB 11s ease-in-out infinite; }
+  @keyframes floatA { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-14px);} }
+  @keyframes floatB { 0%,100%{ transform: translateY(0) rotate(0);} 50%{ transform: translateY(12px) rotate(3deg);} }
+
+  /* slow spin for orbit rings */
+  .spin-slow { animation: spin 48s linear infinite; transform-origin: center; }
+  .spin-rev { animation: spin 60s linear infinite reverse; transform-origin: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  ::selection { background: var(--green); color: #FAFAFA; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body class="noise">
+
+<!-- Background FX -->
+<div class="fx-aurora" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+</div>
+<div class="fx-grid" aria-hidden="true"></div>
+<div class="fx-spot" aria-hidden="true"></div>
+
+<!-- Scroll progress -->
+<div id="scrollProgress"></div>
+
+<!-- ===================== NAV ===================== -->
+<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-[#FAFAFA]/80 border-b border-[var(--border)]">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+    <nav class="flex items-center h-14">
+      <a href="#" class="flex items-center gap-2">
+        <svg class="alma-logo" width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Alma">
+          <rect width="32" height="32" rx="7.5" fill="#15583E"/>
+          <path d="M9 22.5 L16 9 L23 22.5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.7 17.3 L20.3 17.3" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M19.5 22.3 L20.15 20.75 L21.7 20.1 L20.15 19.45 L19.5 17.9 L18.85 19.45 L17.3 20.1 L18.85 20.75 Z" fill="#FFFFFF"/>
+        </svg>
+        <span class="font-medium text-[14.5px] tracking-tight text-[var(--ink)]">Alma</span>
+        <span class="ml-1 text-[10px] eyebrow !text-[10px]">v3</span>
+      </a>
+
+      <ul class="hidden md:flex items-center gap-7 ml-12 text-[13.5px]">
+        <li><a href="#study" class="link" data-en="Study" data-ru="Принцип">Study</a></li>
+        <li><a href="#features" class="link" data-en="Studio" data-ru="Студия">Studio</a></li>
+        <li><a href="#ask" class="link" data-en="What it does" data-ru="Что умеет">What it does</a></li>
+        <li><a href="#how" class="link" data-en="Method" data-ru="Метод">Method</a></li>
+        <li><a href="#pricing" class="link" data-en="Pricing" data-ru="Тарифы">Pricing</a></li>
+        <li class="has-dropdown relative">
+          <button type="button" class="link flex items-center gap-1">Compare<i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+          <div class="dropdown absolute top-full left-1/2 -translate-x-1/2 pt-3">
+            <div class="surface w-44 p-1.5">
+              <a href="#" class="block px-3 py-1.5 rounded text-[13px] text-[var(--fg-muted)] hover:text-[var(--green)] hover:bg-[var(--green-faint)]">vs. Notion</a>
+              <a href="#" class="block px-3 py-1.5 rounded text-[13px] text-[var(--fg-muted)] hover:text-[var(--green)] hover:bg-[var(--green-faint)]">vs. Jasper</a>
+              <a href="#" class="block px-3 py-1.5 rounded text-[13px] text-[var(--fg-muted)] hover:text-[var(--green)] hover:bg-[var(--green-faint)]">vs. Copy.ai</a>
+              <a href="#" class="block px-3 py-1.5 rounded text-[13px] text-[var(--fg-muted)] hover:text-[var(--green)] hover:bg-[var(--green-faint)]">vs. Taplio</a>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="hidden md:flex items-center gap-3 ml-auto">
+        <span class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang-btn="en">EN</button>
+          <button type="button" data-lang-btn="ru">RU</button>
+        </span>
+        <a href="signin.html" class="btn btn-text">
+          <span class="i18n-en">Sign in</span><span class="i18n-ru">Войти</span>
+        </a>
+        <a href="signin.html?mode=signup" class="btn btn-primary btn-sm magnetic">
+          <span class="i18n-en">Start free</span><span class="i18n-ru">Начать</span>
+          <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </a>
+      </div>
+
+      <button id="hamburger" type="button" class="md:hidden ml-auto w-9 h-9 grid place-items-center rounded-md border border-[var(--border-strong)]" aria-label="Toggle menu">
+        <i data-lucide="menu" class="w-4 h-4"></i>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div id="mobileMenu" class="mobile-menu fixed inset-y-0 right-0 w-[78%] max-w-sm z-[60] bg-[#FAFAFA] border-l border-[var(--border)] p-7 md:hidden">
+  <div class="flex justify-between items-center mb-10">
+    <span class="font-medium text-sm">Menu</span>
+    <button id="closeMenu" type="button" class="w-9 h-9 grid place-items-center rounded-md border border-[var(--border-strong)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+  </div>
+  <ul class="flex flex-col gap-1 text-[15px]">
+    <li><a href="#study" class="block py-2.5 link" data-en="Study" data-ru="Принцип">Study</a></li>
+    <li><a href="#features" class="block py-2.5 link" data-en="Studio" data-ru="Студия">Studio</a></li>
+    <li><a href="#ask" class="block py-2.5 link" data-en="What it does" data-ru="Что умеет">What it does</a></li>
+    <li><a href="#how" class="block py-2.5 link" data-en="Method" data-ru="Метод">Method</a></li>
+    <li><a href="#pricing" class="block py-2.5 link" data-en="Pricing" data-ru="Тарифы">Pricing</a></li>
+    <li class="mt-1 pt-3 border-t border-[var(--border)]"><a href="signin.html" class="block py-2.5 link">Sign in</a></li>
+  </ul>
+  <a href="signin.html?mode=signup" class="mt-6 btn btn-primary w-full justify-center">Start free</a>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section class="relative pt-36 md:pt-44 pb-24 md:pb-32 overflow-hidden">
+  <!-- decorative organic SVG, parallax + float -->
+  <div class="hidden lg:block absolute right-[-60px] top-[64px] w-[560px] h-[560px] -z-[0] opacity-90 float-a" data-parallax="-0.06" aria-hidden="true">
+    <svg viewBox="0 0 560 560" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+      <defs>
+        <radialGradient id="gOrb" cx="42%" cy="36%" r="70%">
+          <stop offset="0%" stop-color="#2D9E6E" stop-opacity="0.26"/>
+          <stop offset="55%" stop-color="#1F7A55" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#15583E" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="gVine" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#2D9E6E"/>
+          <stop offset="100%" stop-color="#15583E"/>
+        </linearGradient>
+      </defs>
+      <!-- soft orb -->
+      <circle cx="300" cy="250" r="220" fill="url(#gOrb)"/>
+      <!-- orbit rings -->
+      <g class="spin-slow" style="transform-box: fill-box; transform-origin: center;">
+        <ellipse cx="300" cy="250" rx="232" ry="232" stroke="rgba(21,88,62,0.16)" stroke-width="1" stroke-dasharray="2 8"/>
+      </g>
+      <g class="spin-rev" style="transform-box: fill-box; transform-origin: center;">
+        <ellipse cx="300" cy="250" rx="180" ry="180" stroke="rgba(21,88,62,0.20)" stroke-width="1"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10 relative z-[1]">
+
+    <div class="grid grid-cols-12 gap-x-8 gap-y-12 items-end">
+      <!-- Left: headline -->
+      <div class="col-span-12 lg:col-span-7">
+        <div class="sec-label mb-7 reveal">
+          <span class="sec-num">M / 001</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="badge-live eyebrow"><span class="dot"></span> Live · 1,204 new posts today</span>
+        </div>
+
+        <h1 class="display reveal text-[44px] sm:text-[58px] md:text-[72px] lg:text-[84px]" data-delay="1">
+          <span class="i18n-en">Your AI<br/><span class="shimmer">content strategist.</span></span>
+          <span class="i18n-ru">Твой AI-стратег<br/><span class="shimmer">по контенту.</span></span>
+        </h1>
+
+        <p class="mt-8 max-w-[480px] text-[15px] text-[var(--fg-muted)] reveal" data-delay="2">
+          <span class="i18n-en">Alma researches the <b class="text-[var(--ink)] font-medium">outlier posts winning in your niche</b>, validates each idea against <b class="text-[var(--ink)] font-medium">your voice and audience</b>, and gives you <b class="text-[var(--ink)] font-medium">ideas you can write daily</b>.</span>
+          <span class="i18n-ru">Alma изучает <b class="text-[var(--ink)] font-medium">аутлайеры — посты-вспышки в твоей нише</b>, валидирует каждую идею под <b class="text-[var(--ink)] font-medium">твой голос и аудиторию</b>, и каждое утро присылает <b class="text-[var(--ink)] font-medium">идеи, которые остаётся только написать</b>.</span>
+        </p>
+
+        <div class="mt-9 flex items-center gap-3 reveal" data-delay="3">
+          <a href="signin.html?mode=signup" class="btn btn-primary magnetic">
+            <span class="i18n-en">Get started</span><span class="i18n-ru">Начать бесплатно</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+          <a href="#how" class="btn btn-text">
+            <span class="i18n-en">Watch the method</span><span class="i18n-ru">Как это работает</span>
+            <i data-lucide="arrow-down-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+
+        <div class="mt-12 flex items-center gap-6 text-[12px] text-[var(--fg-subtle)] font-mono tnum reveal" data-delay="4">
+          <span>1.2M&nbsp;posts</span>
+          <span class="text-[var(--fg-faint)]">·</span>
+          <span>9M+&nbsp;views/mo</span>
+          <span class="text-[var(--fg-faint)]">·</span>
+          <span>42&nbsp;countries</span>
+        </div>
+      </div>
+
+      <!-- Right: dark product window with green halo + tilt -->
+      <div class="col-span-12 lg:col-span-5 reveal" data-delay="2">
+        <div class="ui-window-wrap" id="tiltWrap">
+          <figure class="ui-window-dark" id="tiltCard">
+            <div class="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
+              <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+              <span class="ml-3 text-[11px] text-white/35 font-mono">alma.so / hooks</span>
+              <span class="ml-auto text-[10px] text-white/40 font-mono tnum">12.4 ×</span>
+            </div>
+            <div class="p-5 space-y-4">
+              <div>
+                <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono font-medium mb-1.5">Validated · X</div>
+                <p class="text-[15px] leading-[1.45] tracking-[-0.012em] text-white">
+                  "Most people don't fail because they're lazy.<br/>They fail because every Monday looks like the last one."
+                </p>
+              </div>
+              <div class="border-t border-white/[0.06] pt-4">
+                <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono font-medium mb-1.5">Remix · in your voice</div>
+                <p class="text-[14px] leading-[1.45] tracking-[-0.011em] text-white/70">
+                  I used to think discipline was the problem. It wasn't. Every Monday I had the same plan as last Monday. That's the loop you break first.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-2">
+                <button class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded border border-white/15 hover:border-white/30 text-white/80 transition"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Regenerate</button>
+                <button class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded border border-white/15 hover:border-white/30 text-white/80 transition"><i data-lucide="copy" class="w-3 h-3"></i> Copy</button>
+                <span class="ml-auto text-[10px] text-white/40 font-mono">87% voice match</span>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATS GRID ===================== -->
+<section class="hr-t relative">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+    <div class="grid grid-cols-2 md:grid-cols-4">
+      <div class="stat-cell">
+        <div class="eyebrow !text-[10px]">Indexed</div>
+        <div class="mt-2 font-mono tnum text-[28px] font-medium tracking-tight text-[var(--green)]"><span data-count="1.2" data-suffix="M">0</span></div>
+        <div class="text-[12px] text-[var(--fg-subtle)] mt-1">viral posts</div>
+      </div>
+      <div class="stat-cell">
+        <div class="eyebrow !text-[10px]">Monthly</div>
+        <div class="mt-2 font-mono tnum text-[28px] font-medium tracking-tight text-[var(--green)]"><span data-count="9" data-suffix="M+">0</span></div>
+        <div class="text-[12px] text-[var(--fg-subtle)] mt-1">views generated</div>
+      </div>
+      <div class="stat-cell">
+        <div class="eyebrow !text-[10px]">Creators</div>
+        <div class="mt-2 font-mono tnum text-[28px] font-medium tracking-tight text-[var(--green)]"><span data-count="12400">0</span></div>
+        <div class="text-[12px] text-[var(--fg-subtle)] mt-1">shipping with Alma</div>
+      </div>
+      <div class="stat-cell">
+        <div class="eyebrow !text-[10px]">Reach</div>
+        <div class="mt-2 font-mono tnum text-[28px] font-medium tracking-tight text-[var(--green)]"><span data-count="42">0</span></div>
+        <div class="text-[12px] text-[var(--fg-subtle)] mt-1">countries</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LIVE HOOK MARQUEE ===================== -->
+<section class="py-10 hr-t overflow-hidden">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10 mb-6">
+    <div class="flex items-center gap-3">
+      <span class="badge-live eyebrow"><span class="dot"></span> Trending hooks</span>
+      <span class="h-px flex-1 bg-[var(--border)]"></span>
+      <span class="text-[11px] font-mono text-[var(--fg-faint)]">updated continuously</span>
+    </div>
+  </div>
+  <div class="marquee">
+    <div class="marquee-track">
+      <span class="hook-chip">"Most people don't fail because…" <span class="mult">12.4×</span></span>
+      <span class="hook-chip">"I quit my job at 24. Here's what nobody…" <span class="mult">8.1×</span></span>
+      <span class="hook-chip">"The 3-sentence framework that…" <span class="mult">6.7×</span></span>
+      <span class="hook-chip">"You're not lazy. You're overwhelmed." <span class="mult">9.9×</span></span>
+      <span class="hook-chip">"Steal my exact posting schedule" <span class="mult">5.2×</span></span>
+      <span class="hook-chip">"Nobody tells you this about growth" <span class="mult">7.4×</span></span>
+      <!-- duplicate for seamless loop -->
+      <span class="hook-chip">"Most people don't fail because…" <span class="mult">12.4×</span></span>
+      <span class="hook-chip">"I quit my job at 24. Here's what nobody…" <span class="mult">8.1×</span></span>
+      <span class="hook-chip">"The 3-sentence framework that…" <span class="mult">6.7×</span></span>
+      <span class="hook-chip">"You're not lazy. You're overwhelmed." <span class="mult">9.9×</span></span>
+      <span class="hook-chip">"Steal my exact posting schedule" <span class="mult">5.2×</span></span>
+      <span class="hook-chip">"Nobody tells you this about growth" <span class="mult">7.4×</span></span>
+    </div>
+  </div>
+  <div class="marquee mt-3.5">
+    <div class="marquee-track rev">
+      <span class="hook-chip">"The mistake that cost me 2 years" <span class="mult">11.0×</span></span>
+      <span class="hook-chip">"Read this before you post again" <span class="mult">4.8×</span></span>
+      <span class="hook-chip">"How I write a week of posts in 1 hour" <span class="mult">10.3×</span></span>
+      <span class="hook-chip">"Unpopular opinion about consistency" <span class="mult">6.1×</span></span>
+      <span class="hook-chip">"The hook formula that never misses" <span class="mult">13.7×</span></span>
+      <span class="hook-chip">"What I'd do with 0 followers today" <span class="mult">8.9×</span></span>
+      <span class="hook-chip">"The mistake that cost me 2 years" <span class="mult">11.0×</span></span>
+      <span class="hook-chip">"Read this before you post again" <span class="mult">4.8×</span></span>
+      <span class="hook-chip">"How I write a week of posts in 1 hour" <span class="mult">10.3×</span></span>
+      <span class="hook-chip">"Unpopular opinion about consistency" <span class="mult">6.1×</span></span>
+      <span class="hook-chip">"The hook formula that never misses" <span class="mult">13.7×</span></span>
+      <span class="hook-chip">"What I'd do with 0 followers today" <span class="mult">8.9×</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STUDY ===================== -->
+<section id="study" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-8 mb-20">
+      <div class="col-span-12 lg:col-span-6 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">02</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">Weekly brief</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">Your weekly<br/><span class="accent">research brief.</span></span>
+          <span class="i18n-ru">Твой еженедельный<br/><span class="accent">research-бриф.</span></span>
+        </h2>
+        <p class="mt-6 text-[15px] text-[var(--fg-muted)] leading-[1.65] max-w-[460px]">
+          <span class="i18n-en">You can't search across millions of posts. Alma can.</span>
+          <span class="i18n-ru">Ты не можешь просмотреть миллионы постов. Alma может.</span>
+        </p>
+      </div>
+      <div class="col-span-12 lg:col-span-6 lg:pt-6 reveal" data-delay="1">
+        <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65] max-w-[480px]">
+          <span class="i18n-en">A good content strategist does three things: studies what's working, figures out what's right for you, and hands you ideas worth posting. Alma does all three. On repeat. While you sleep.</span>
+          <span class="i18n-ru">Хороший контент-стратег делает три вещи: изучает что работает, понимает что подходит именно тебе, и выдаёт идеи, которые стоит публиковать. Alma делает все три. По кругу. Пока ты спишь.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8 lg:gap-10">
+
+      <div class="reveal">
+        <div class="lead-num mb-6">01 / Research</div>
+        <h3 class="text-[20px] font-medium tracking-tight mb-3">
+          <span class="i18n-en">Researches what's working.</span>
+          <span class="i18n-ru">Изучает что работает.</span>
+        </h3>
+        <p class="text-[14.5px] text-[var(--fg-muted)] leading-relaxed mb-6">
+          <span class="i18n-en">Every week Alma scans the outlier posts in your niche — across X, YouTube, Instagram, TikTok, LinkedIn and Substack. It surfaces patterns winning right now, before everyone catches on.</span>
+          <span class="i18n-ru">Каждую неделю Alma сканирует аутлайер-посты в твоей нише — X, YouTube, Instagram, TikTok, LinkedIn и Substack. Показывает паттерны которые работают прямо сейчас, до того как все их заметят.</span>
+        </p>
+        <div class="card-hl glow-card lift p-4 text-[12.5px] font-mono tnum space-y-1.5">
+          <div class="flex items-center justify-between"><span class="text-[var(--fg-muted)]">productivity · 30d</span><span class="text-[var(--green)] font-medium">+412%</span></div>
+          <div class="flex items-center justify-between"><span class="text-[var(--fg-muted)]">format · 7-tweet thread</span><span class="text-[var(--fg-muted)]">2,140</span></div>
+          <div class="flex items-center justify-between"><span class="text-[var(--fg-muted)]">hook · contrarian opener</span><span class="text-[var(--fg-muted)]">880</span></div>
+          <div class="flex items-center justify-between"><span class="text-[var(--fg-muted)]">niche · solopreneur</span><span class="text-[var(--fg-muted)]">12.4×</span></div>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="1">
+        <div class="lead-num mb-6">02 / Validate</div>
+        <h3 class="text-[20px] font-medium tracking-tight mb-3">
+          <span class="i18n-en">Validates it's right for you.</span>
+          <span class="i18n-ru">Валидирует под тебя.</span>
+        </h3>
+        <p class="text-[14.5px] text-[var(--fg-muted)] leading-relaxed mb-6">
+          <span class="i18n-en">Not every viral idea is your idea. Alma scores each one against your voice, your topics and your audience — and keeps only the unique, well-packaged ideas that actually fit. The rest never reach you.</span>
+          <span class="i18n-ru">Не каждая вирусная идея — твоя. Alma оценивает каждую под твой голос, темы и аудиторию, и оставляет только уникальные, упакованные идеи, которые реально подходят. Остальное до тебя не доходит.</span>
+        </p>
+        <div class="card-hl glow-card lift p-4 text-[12.5px] font-mono tnum">
+          <div class="flex justify-between text-[var(--fg-subtle)] mb-2"><span>voice match</span><span class="text-[var(--green)] font-medium">87%</span></div>
+          <div class="h-1 rounded-full bg-[var(--border)] overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-[var(--green)] to-[var(--green-bright)]" style="width:87%"></div></div>
+          <div class="mt-4 flex flex-wrap gap-1.5 text-[11px]">
+            <span class="px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--fg-muted)]">short sentences</span>
+            <span class="px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--fg-muted)]">no em-dashes</span>
+            <span class="px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--fg-muted)]">first-person</span>
+            <span class="px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--fg-muted)]">dry humor</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="2">
+        <div class="lead-num mb-6">03 / Deliver</div>
+        <h3 class="text-[20px] font-medium tracking-tight mb-3">
+          <span class="i18n-en">Delivers ideas you just write.</span>
+          <span class="i18n-ru">Отдаёт идеи, остаётся написать.</span>
+        </h3>
+        <p class="text-[14.5px] text-[var(--fg-muted)] leading-relaxed mb-6">
+          <span class="i18n-en">Each morning a few execution-ready ideas land in your brief — with the hook, the angle, the structure, and why it beats the obvious version. Plus past posts of yours worth repurposing.</span>
+          <span class="i18n-ru">Каждое утро в брифе несколько готовых идей — хук, угол, структура и почему это лучше очевидного варианта. Плюс твои старые посты, которые стоит переупаковать.</span>
+        </p>
+        <div class="card-hl glow-card lift p-4 text-[12.5px] font-mono tnum space-y-1.5">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded-md bg-[var(--green-soft)] border border-[var(--border)] grid place-items-center text-[var(--green)]"><i data-lucide="mail" class="w-3 h-3"></i></div>
+            <div class="text-[var(--fg)]">Morning brief · Tue</div>
+            <span class="ml-auto text-[var(--fg-subtle)]">5 ideas</span>
+          </div>
+          <div class="flex justify-between"><span class="text-[var(--fg-muted)]">hook · "Most people…"</span><span class="text-[var(--green)] font-medium">ready</span></div>
+          <div class="flex justify-between"><span class="text-[var(--fg-muted)]">format · 7-tweet thread</span><span class="text-[var(--fg-muted)]">1,240w</span></div>
+          <div class="flex justify-between"><span class="text-[var(--fg-muted)]">repurpose · post Mar 14</span><span class="text-[var(--fg-muted)]">3.1×</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTOUR BAND (decorative SVG) ===================== -->
+<section class="relative hr-t overflow-hidden" aria-hidden="true">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10 py-16 md:py-24 reveal">
+    <div class="relative rounded-2xl overflow-hidden border border-[var(--border)] bg-[#FFFFFF]">
+      <svg viewBox="0 0 1200 320" preserveAspectRatio="xMidYMid slice" class="w-full h-[220px] md:h-[300px]" id="contourSvg">
+        <defs>
+          <linearGradient id="gBand" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#15583E" stop-opacity="0.0"/>
+            <stop offset="50%" stop-color="#1F7A55" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#2D9E6E" stop-opacity="0.0"/>
+          </linearGradient>
+          <radialGradient id="gSeed" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2D9E6E"/>
+            <stop offset="100%" stop-color="#15583E"/>
+          </radialGradient>
+        </defs>
+        <!-- stacked organic contour lines -->
+        <g fill="none" stroke="url(#gBand)" stroke-width="1.25">
+          <path class="draw-path" style="--len:1300" d="M-20 250 C 200 200, 360 300, 600 240 S 1000 180, 1220 240"/>
+          <path class="draw-path" style="--len:1300" d="M-20 210 C 220 150, 380 250, 600 190 S 1010 130, 1220 200"/>
+          <path class="draw-path" style="--len:1300" d="M-20 170 C 240 110, 400 200, 600 150 S 1020 90, 1220 160"/>
+          <path class="draw-path" style="--len:1300" d="M-20 130 C 260 80, 420 160, 600 110 S 1030 60, 1220 120"/>
+          <path class="draw-path" style="--len:1300" d="M-20 90 C 280 50, 440 120, 600 80 S 1040 30, 1220 90"/>
+        </g>
+        <!-- glowing seed nodes along a path -->
+        <g>
+          <circle cx="200" cy="232" r="4" fill="url(#gSeed)"/>
+          <circle cx="600" cy="218" r="5" fill="url(#gSeed)"/>
+          <circle cx="940" cy="196" r="4" fill="url(#gSeed)"/>
+          <circle cx="380" cy="176" r="3.5" fill="url(#gSeed)"/>
+          <circle cx="1040" cy="150" r="3.5" fill="url(#gSeed)"/>
+        </g>
+      </svg>
+      <div class="absolute inset-0 flex items-center">
+        <div class="px-7 md:px-12">
+          <div class="eyebrow mb-3">The landscape of what works</div>
+          <p class="font-serif italic text-[26px] md:text-[38px] leading-[1.1] tracking-tight text-[var(--green)] max-w-[520px]">
+            Every viral post leaves a trace. Alma reads the terrain so you don't have to.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section id="features" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-8 mb-20">
+      <div class="col-span-12 lg:col-span-6 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">03</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">Identities</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">Alma learns exactly<br/><span class="accent">how you think, write and speak.</span></span>
+          <span class="i18n-ru">Alma учится как ты<br/><span class="accent">думаешь, пишешь и говоришь.</span></span>
+        </h2>
+      </div>
+      <div class="col-span-12 lg:col-span-6 lg:pt-6 reveal" data-delay="1">
+        <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65] max-w-[480px]">
+          <span class="i18n-en">Your research means nothing if the ideas don't sound like you. Build your identity in Alma — and every idea will come back unmistakably yours.</span>
+          <span class="i18n-ru">Research ничего не стоит, если идеи звучат не как ты. Собери свою идентичность в Alma — и каждая идея вернётся точно в твоём голосе.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-px bg-[var(--border)] border border-[var(--border)] rounded-xl overflow-hidden">
+
+      <div class="bg-[var(--bg)] glow-card p-8 lg:p-10 reveal">
+        <div class="w-10 h-10 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-7"><i data-lucide="user-round" class="w-4 h-4 text-[var(--green)]"></i></div>
+        <h3 class="text-[19px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Never sound like generic AI.</span>
+          <span class="i18n-ru">Никогда не звучи как обычный AI.</span>
+        </h3>
+        <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] max-w-[360px]">
+          <span class="i18n-en">Walk through a guided chat, paste links to your best work, or sketch your voice in a minute. Alma turns it into a profile it can write in.</span>
+          <span class="i18n-ru">Пройди гайд, кинь ссылки на лучшие посты или набросай голос за минуту. Alma превращает это в профиль, в котором умеет писать.</span>
+        </p>
+      </div>
+
+      <div class="bg-[var(--bg)] glow-card p-8 lg:p-10 reveal" data-delay="1">
+        <div class="w-10 h-10 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-7"><i data-lucide="users-round" class="w-4 h-4 text-[var(--green)]"></i></div>
+        <h3 class="text-[19px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">A voice for every side of you.</span>
+          <span class="i18n-ru">Голос для каждой стороны тебя.</span>
+        </h3>
+        <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] max-w-[360px]">
+          <span class="i18n-en">Keep a personal voice, then spin up custom identities for the topics, brands or audiences you write for — each one still unmistakably you.</span>
+          <span class="i18n-ru">Личный голос плюс отдельные идентичности под темы, бренды или аудитории — каждый всё равно безошибочно твой.</span>
+        </p>
+      </div>
+
+      <div class="bg-[var(--bg)] glow-card p-8 lg:p-10 reveal" data-delay="2">
+        <div class="w-10 h-10 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-7"><i data-lucide="sparkles" class="w-4 h-4 text-[var(--green)]"></i></div>
+        <h3 class="text-[19px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Every idea comes back sounding like you.</span>
+          <span class="i18n-ru">Каждая идея возвращается твоим голосом.</span>
+        </h3>
+        <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] max-w-[360px]">
+          <span class="i18n-en">Your identity is the input to the brief — ideas are validated against your voice — and the output of every draft. One model, both jobs.</span>
+          <span class="i18n-ru">Идентичность — вход в бриф: идеи валидируются под твой голос, и выход каждого драфта приходит в нём же. Одна модель, обе задачи.</span>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="mt-14 text-center reveal">
+      <p class="font-serif italic text-[22px] md:text-[26px] text-[var(--ink)] leading-[1.4] max-w-[680px] mx-auto">
+        <span class="i18n-en">AI made everyone sound the same.<br/><span class="accent">An identity is how you stay unmistakably you.</span></span>
+        <span class="i18n-ru">AI сделал так, что все звучат одинаково.<br/><span class="accent">Идентичность — как остаться собой.</span></span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ASK ALMA — capabilities showcase ===================== -->
+<section id="ask" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-8 mb-16">
+      <div class="col-span-12 lg:col-span-7 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">04</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">Everything in one tab</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">Throw away your research<br/>and writing tools.<br/><span class="accent">Alma combines them all.</span></span>
+          <span class="i18n-ru">Выкидывай свои<br/>research- и writing-тулзы.<br/><span class="accent">Alma заменяет их всех.</span></span>
+        </h2>
+      </div>
+      <div class="col-span-12 lg:col-span-5 lg:pt-6 reveal" data-delay="1">
+        <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65] max-w-[460px]">
+          <span class="i18n-en">Not a "generic AI" — a focused content partner. Research, study, remix, draft and ship — all in one place, every step aware of your voice and your niche.</span>
+          <span class="i18n-ru">Не «общий AI», а конкретный партнёр по контенту. Research, изучение, ремикс, драфт и публикация — в одном месте, каждый шаг знает твой голос и твою нишу.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+      <!-- 1. Chat with anything -->
+      <div class="card-hl glow-card lift p-5 reveal">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="message-square" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">01 / Chat with anything</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Chat with any board, link, creator, or topic.</span>
+          <span class="i18n-ru">Общайся с любой доской, ссылкой, криэйтором или темой.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Alma is the only AI that lets you chat with any creator's posts and research across all platforms. Plus, no other AI can chat with YouTube, Instagram or social links.</span>
+          <span class="i18n-ru">Единственный AI, в котором можно «разговаривать» с постами любого криэйтора и исследовать тренды на всех платформах. И никакой другой AI не общается с YouTube, Instagram и соц-ссылками.</span>
+        </p>
+      </div>
+
+      <!-- 2. Validated ideas -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="1">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="search" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">02 / Validated ideas</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Find validated ideas, on any platform.</span>
+          <span class="i18n-ru">Находи проверенные идеи на любой платформе.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Search 1M+ high-performing posts in your niche across X, YouTube, Instagram, TikTok, LinkedIn and Substack. Sort by views, format or outlier multiplier.</span>
+          <span class="i18n-ru">Ищи среди 1M+ топовых постов в твоей нише — X, YouTube, Instagram, TikTok, LinkedIn, Substack. Сорти по просмотрам, формату или outlier-множителю.</span>
+        </p>
+      </div>
+
+      <!-- 3. Study creators -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="2">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="users" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">03 / Study creators</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Study any creator's top content, add them to lists.</span>
+          <span class="i18n-ru">Изучай топ-контент любого криэйтора, добавляй в списки.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Pick any creator and slice their feed by views, outlier multiplier or format. Save the wins straight into a list you can pull back open later.</span>
+          <span class="i18n-ru">Выбирай любого криэйтора и нарезай его фид по просмотрам, outlier-множителю или формату. Сохраняй удачи в список — потом откроешь.</span>
+        </p>
+      </div>
+
+      <!-- 4. One into a week -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="3">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="rocket" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">04 / One into a week</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Turn one post into a week of content.</span>
+          <span class="i18n-ru">Один пост → неделя контента.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Boost any saved swipe to get variations across formats, lengths and platforms. A single core idea fills your whole calendar — without a second brainstorm.</span>
+          <span class="i18n-ru">Бустни любой сохранённый свайп — получишь вариации под форматы, длины и платформы. Одна идея закрывает весь календарь, без второго брейнсторма.</span>
+        </p>
+      </div>
+
+      <!-- 5. Reverse engineer -->
+      <div class="card-hl glow-card lift p-5 reveal">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="link-2" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">05 / Reverse engineer</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Reverse-engineer any post, apply it to your idea.</span>
+          <span class="i18n-ru">Раскладывай любой пост и применяй к своей идее.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Paste a link, get the structure broken down: hook, beats, payoff. Alma then maps that structure onto your own idea — in your voice.</span>
+          <span class="i18n-ru">Вставляй ссылку — получаешь разбор структуры: хук, биты, payoff. Alma накладывает её на твою идею — в твоём голосе.</span>
+        </p>
+      </div>
+
+      <!-- 6. Transcribe video -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="1">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="video" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">06 / Transcribe + chat</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Transcribe and chat with any video, reel or post.</span>
+          <span class="i18n-ru">Транскрибирует и общается с любым видео, риллсом, постом.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Most AI tools can't read a YouTube video, a TikTok or an Instagram reel. Alma transcribes anything you save — so you can chat with it, break it down or remix it in your voice.</span>
+          <span class="i18n-ru">Большинство AI не умеют читать YouTube, TikTok и Instagram-риллсы. Alma транскрибирует всё что ты сохраняешь — общайся, раскладывай, ремикси в своём голосе.</span>
+        </p>
+      </div>
+
+      <!-- 7. Boards -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="2">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">07 / Project boards</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Paste links and save posts to project boards.</span>
+          <span class="i18n-ru">Кидай ссылки и сохраняй посты на доски проектов.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Drop a URL or hit save anywhere in Alma to file it into a themed board. Pull the board back open later when you're hunting an angle on the same topic.</span>
+          <span class="i18n-ru">Вставляй URL или жми save где угодно — пост ложится в тематическую доску. Откроешь позже, когда снова будешь искать угол по этой теме.</span>
+        </p>
+      </div>
+
+      <!-- 8. Script + write -->
+      <div class="card-hl glow-card lift p-5 reveal" data-delay="3">
+        <div class="w-8 h-8 rounded-lg bg-[var(--green-soft)] grid place-items-center mb-4">
+          <i data-lucide="pen-line" class="w-4 h-4 text-[var(--green)]"></i>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-faint)] mb-1.5">08 / Script + write</div>
+        <h3 class="text-[16px] font-medium tracking-tight mb-2">
+          <span class="i18n-en">Script, outline and write — all in one place.</span>
+          <span class="i18n-ru">Сценарь, аутлайн и пиши — всё в одном месте.</span>
+        </h3>
+        <p class="text-[12.5px] text-[var(--fg-muted)] leading-[1.55] border-t border-[var(--border)] pt-3">
+          <span class="i18n-en">Outline, script and draft in a single editor. Your swipe files and saved ideas sit one click away the whole time — so the page is never blank.</span>
+          <span class="i18n-ru">Аутлайн, сценарий и драфт — в одном редакторе. Свайпы и сохранённые идеи в одном клике, поэтому страница никогда не пустая.</span>
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== A DAY IN ALMA — workflow narrative ===================== -->
+<section id="day" class="py-28 md:py-36 hr-t" style="background: var(--green-faint);">
+  <div class="max-w-[1100px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-8 mb-16">
+      <div class="col-span-12 lg:col-span-6 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">05</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">A day with Alma</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">A day<br/><span class="accent">in your studio.</span></span>
+          <span class="i18n-ru">Один день<br/><span class="accent">в твоей студии.</span></span>
+        </h2>
+      </div>
+      <div class="col-span-12 lg:col-span-5 lg:col-start-8 lg:pt-6 reveal" data-delay="1">
+        <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65]">
+          <span class="i18n-en">Not complicated. Not "learning a tool". Just open and tell it what you need — like to a product manager who understands content.</span>
+          <span class="i18n-ru">Не сложно. Не про «изучение инструмента». Просто открываешь и говоришь что надо — как с продакт-менеджером, который понимает контент.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+
+      <!-- Morning -->
+      <div class="reveal grid grid-cols-12 gap-x-6 items-start">
+        <div class="col-span-12 md:col-span-3 flex items-center gap-3 mb-3 md:mb-0">
+          <span class="font-mono text-[11px] text-[var(--green)] tracking-wider">09:14</span>
+          <span class="text-[12px] uppercase tracking-widest text-[var(--fg-subtle)] font-mono">Утро</span>
+        </div>
+        <div class="col-span-12 md:col-span-9 card-hl p-6 lg:p-7">
+          <h3 class="text-[18px] font-medium tracking-tight mb-3">Открываешь Planner — видишь что в работе</h3>
+          <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] mb-4">
+            На сегодня запланирован пост в X. Драфт уже лежит в My Drafts — со вчерашнего дня. Открываешь, читаешь.
+            Чувствуешь — хук слабоват.
+          </p>
+          <div class="bg-[var(--ink)] text-white/85 rounded-lg p-4 font-mono text-[12.5px] leading-[1.6]">
+            <span class="text-white/40 select-none">› ты: </span>«сделай хук острее, в моём голосе»
+            <br/>
+            <span class="text-[var(--green-bright)]">› Alma:</span> переписывает за 4 секунды. Сохраняет старую версию рядом.
+          </div>
+        </div>
+      </div>
+
+      <!-- Afternoon -->
+      <div class="reveal grid grid-cols-12 gap-x-6 items-start" data-delay="1">
+        <div class="col-span-12 md:col-span-3 flex items-center gap-3 mb-3 md:mb-0">
+          <span class="font-mono text-[11px] text-[var(--green)] tracking-wider">14:32</span>
+          <span class="text-[12px] uppercase tracking-widest text-[var(--fg-subtle)] font-mono">День</span>
+        </div>
+        <div class="col-span-12 md:col-span-9 card-hl p-6 lg:p-7">
+          <h3 class="text-[18px] font-medium tracking-tight mb-3">Увидел крутое видео конкурента — кидаешь в Alma</h3>
+          <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] mb-4">
+            Вкладка Analyze URL. Вставляешь ссылку. Через 10 секунд Alma выдаёт:
+            тип хука, какая структура использовалась, почему этот формат сработал именно сейчас,
+            готовый шаблон-болванка и <strong class="text-[var(--ink)]">твой ремикс — на твою нишу, в твоём голосе</strong>.
+          </p>
+          <p class="text-[13px] text-[var(--fg-subtle)] flex items-center gap-2">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+            Сохраняешь шаблон в Saved → используешь когда нужна свежая структура.
+          </p>
+        </div>
+      </div>
+
+      <!-- Evening -->
+      <div class="reveal grid grid-cols-12 gap-x-6 items-start" data-delay="2">
+        <div class="col-span-12 md:col-span-3 flex items-center gap-3 mb-3 md:mb-0">
+          <span class="font-mono text-[11px] text-[var(--green)] tracking-wider">19:48</span>
+          <span class="text-[12px] uppercase tracking-widest text-[var(--fg-subtle)] font-mono">Вечер</span>
+        </div>
+        <div class="col-span-12 md:col-span-9 card-hl p-6 lg:p-7">
+          <h3 class="text-[18px] font-medium tracking-tight mb-3">Идея для серии — Alma расписывает на 12 эпизодов</h3>
+          <p class="text-[14px] text-[var(--fg-muted)] leading-[1.6] mb-4">
+            Пишешь в чат: «Хочу запустить серию по утренней дисциплине». Alma возвращает: название серии,
+            обещание зрителю, формат-спека, повторяющиеся биты, 12 эпизодов с углами и хуками,
+            открытый луп для возврата зрителей, финальный payoff. <strong class="text-[var(--ink)]">Готово к 3-месячной кампании.</strong>
+          </p>
+          <div class="flex flex-wrap gap-2 text-[11px]">
+            <span class="px-2 py-1 rounded-md bg-[var(--green-soft)] text-[var(--green)] font-mono">→ Schedule</span>
+            <span class="px-2 py-1 rounded-md bg-[var(--green-soft)] text-[var(--green)] font-mono">→ Save to Drafts</span>
+            <span class="px-2 py-1 rounded-md bg-[var(--green-soft)] text-[var(--green)] font-mono">→ Generate first script</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-16 pt-10 border-t border-[var(--border)] grid grid-cols-1 md:grid-cols-3 gap-8 text-center reveal" data-delay="3">
+      <div>
+        <div class="text-[32px] md:text-[40px] font-medium font-mono tnum tracking-tight text-[var(--green)]">10×</div>
+        <p class="text-[13px] text-[var(--fg-muted)] mt-1">быстрее чем писать с нуля</p>
+      </div>
+      <div>
+        <div class="text-[32px] md:text-[40px] font-medium font-mono tnum tracking-tight text-[var(--green)]">0</div>
+        <p class="text-[13px] text-[var(--fg-muted)] mt-1">"AI-tone" — звучит как ты</p>
+      </div>
+      <div>
+        <div class="text-[32px] md:text-[40px] font-medium font-mono tnum tracking-tight text-[var(--green)]">26</div>
+        <p class="text-[13px] text-[var(--fg-muted)] mt-1">режимов работы — один чат</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== WHY ALMA EXISTS — founder note ===================== -->
+<section id="why" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[900px] mx-auto px-6 lg:px-10 text-center">
+
+    <div class="sec-label mb-8 justify-center reveal">
+      <span class="sec-num">06</span>
+      <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+      <span class="eyebrow">Why Alma exists</span>
+    </div>
+
+    <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px] reveal">
+      <span class="i18n-en">The tool I wish<br/><span class="accent">I had when I started.</span></span>
+      <span class="i18n-ru">Тот инструмент,<br/><span class="accent">которого мне не хватало.</span></span>
+    </h2>
+
+    <div class="mt-12 max-w-[640px] mx-auto reveal" data-delay="1">
+      <p class="font-serif italic text-[20px] md:text-[22px] text-[var(--ink)] leading-[1.55]">
+        <span class="i18n-en">Writing online changes lives. Over the past years I spent thousands of hours studying what works on X, YouTube, Instagram, TikTok and LinkedIn — what hooks travel, what structures convert, what voice keeps an audience. Alma is everything I learned, built into the tool I wish I had when I started.</span>
+        <span class="i18n-ru">Писать в интернете меняет жизнь. За последние годы я провёл тысячи часов, разбирая что работает на X, YouTube, Instagram, TikTok и LinkedIn — какие хуки расходятся, какие структуры конвертят, какой голос удерживает аудиторию. Alma — это всё, что я узнал, собранное в инструмент, которого мне не хватало в начале.</span>
+      </p>
+
+      <div class="mt-8 flex items-center justify-center gap-3 text-[13px] text-[var(--fg-muted)]">
+        <div class="w-9 h-9 rounded-full bg-[var(--green-soft)] border border-[var(--border)] grid place-items-center text-[var(--green)] font-medium">M</div>
+        <div class="text-left">
+          <div class="font-medium text-[var(--ink)]">Maksim</div>
+          <div class="text-[12px] text-[var(--fg-subtle)]">
+            <span class="i18n-en">Founder, Alma</span><span class="i18n-ru">Основатель, Alma</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== EXPERT PROMPT BUILDER ===================== -->
+<section id="how" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-10 items-center">
+      <div class="col-span-12 lg:col-span-5 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">07</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">Expert prompt builder</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">Build insanely good prompts,<br/><span class="accent">or use ours.</span></span>
+          <span class="i18n-ru">Собирай безумно хорошие<br/>промпты — <span class="accent">или бери наши.</span></span>
+        </h2>
+        <p class="mt-7 text-[15px] text-[var(--fg-muted)] leading-[1.65] max-w-[460px]">
+          <span class="i18n-en">Better prompts are how you turn "this sucks" into "this is incredible." Content, ideation, research and marketing prompts built in — created by experts.</span>
+          <span class="i18n-ru">Хороший промпт — это разница между «фигня» и «это невероятно». Внутри уже лежат промпты для контента, идей, ресёрча и маркетинга — собранные экспертами.</span>
+        </p>
+      </div>
+
+      <div class="col-span-12 lg:col-span-7 lg:pl-8 reveal" data-delay="1">
+        <div class="ui-window-dark p-0 overflow-hidden">
+          <div class="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
+            <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-white/12"></span>
+            <span class="ml-3 text-[11px] text-white/35 font-mono">alma.so / prompt-library</span>
+          </div>
+          <div class="p-5 grid grid-cols-2 gap-2 text-[12.5px]">
+            <div class="rounded-md border border-white/[0.06] bg-white/[0.02] p-3">
+              <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono mb-1.5">Content</div>
+              <div class="text-white/90 mb-1">Hook generator</div>
+              <div class="text-white/40 text-[11px]">12 frameworks → 25 variations</div>
+            </div>
+            <div class="rounded-md border border-white/[0.06] bg-white/[0.02] p-3">
+              <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono mb-1.5">Ideation</div>
+              <div class="text-white/90 mb-1">Niche angle finder</div>
+              <div class="text-white/40 text-[11px]">5 unique angles in 8 sec</div>
+            </div>
+            <div class="rounded-md border border-white/[0.06] bg-white/[0.02] p-3">
+              <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono mb-1.5">Research</div>
+              <div class="text-white/90 mb-1">Competitor deep-dive</div>
+              <div class="text-white/40 text-[11px]">Hooks · cadence · format mix</div>
+            </div>
+            <div class="rounded-md border border-white/[0.06] bg-white/[0.02] p-3">
+              <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono mb-1.5">Marketing</div>
+              <div class="text-white/90 mb-1">Launch announcement</div>
+              <div class="text-white/40 text-[11px]">Voice-matched, 3 lengths</div>
+            </div>
+            <div class="rounded-md border border-white/[0.06] bg-white/[0.02] p-3">
+              <div class="text-[10px] uppercase tracking-[0.14em] text-white/45 font-mono mb-1.5">Content</div>
+              <div class="text-white/90 mb-1">Thread structure</div>
+              <div class="text-white/40 text-[11px]">Setup · payoff · CTA scaffolds</div>
+            </div>
+            <div class="rounded-md border border-dashed border-white/[0.10] bg-white/[0.01] p-3 grid place-items-center text-center">
+              <div class="text-white/55">+ build your own</div>
+              <div class="text-white/35 text-[11px] mt-0.5">Save, share, reuse</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CASE IN POINT ===================== -->
+<section class="py-28 md:py-36 hr-t bg-[var(--green-faint)] relative overflow-hidden">
+  <!-- big quotation mark watermark -->
+  <div class="absolute -top-6 left-4 md:left-16 font-serif text-[220px] md:text-[320px] leading-none text-[var(--green)] opacity-[0.06] select-none pointer-events-none" aria-hidden="true">"</div>
+  <div class="max-w-[900px] mx-auto px-6 lg:px-10 reveal relative">
+    <div class="sec-label mb-10">
+      <span class="sec-num">08</span>
+      <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+      <span class="eyebrow">Case in point</span>
+    </div>
+    <h2 class="h2 text-[28px] sm:text-[36px] md:text-[44px] leading-[1.18] tracking-tight mb-6">
+      <span class="i18n-en">Her first post hit 38k.<br/><span class="accent">Her second hit 71k.</span></span>
+      <span class="i18n-ru">Первый пост — 38k.<br/><span class="accent">Второй — 71k.</span></span>
+    </h2>
+    <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65] max-w-[620px] mb-10">
+      <span class="i18n-en">That rarely happens. Lena didn't post and pray. She picked ideas she already knew would work — and gave them her own point of view.</span>
+      <span class="i18n-ru">Так редко бывает. Лена не публиковала вслепую. Она брала идеи, которые уже доказали что работают — и давала им свой угол.</span>
+    </p>
+    <blockquote class="font-serif italic text-[20px] md:text-[24px] leading-[1.45] text-[var(--ink)] max-w-[700px] border-l-2 border-[var(--green)] pl-6">
+      <span class="i18n-en">"I wish more people knew about validation, swipe files, voice emulation. Alma really feels like the best solution for it."</span>
+      <span class="i18n-ru">«Жаль, что мало кто знает про валидацию идей, swipe-файлы и эмуляцию голоса. Alma реально лучшее решение под это.»</span>
+    </blockquote>
+    <div class="mt-8 flex items-center gap-3">
+      <span class="relative w-11 h-11 rounded-full overflow-hidden border border-[var(--border)] bg-[var(--green)] text-[#FAFAFA] grid place-items-center text-[12px] font-medium font-mono shrink-0">
+        ЛС
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=160&h=160&fit=crop&q=80"
+             alt=""
+             loading="lazy" referrerpolicy="no-referrer"
+             class="absolute inset-0 w-full h-full object-cover"
+             onerror="this.remove()" />
+      </span>
+      <div>
+        <div class="text-[14px] font-medium">Лена Соколова</div>
+        <div class="text-[12px] text-[var(--fg-subtle)]">4.2k подписчиков · Substack</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section id="pricing" class="py-28 md:py-36 hr-t">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-12 gap-x-8 mb-16">
+      <div class="col-span-12 lg:col-span-6 reveal">
+        <div class="sec-label mb-6">
+          <span class="sec-num">09</span>
+          <span class="h-px w-8 bg-[var(--border-strong)]"></span>
+          <span class="eyebrow">Pricing</span>
+        </div>
+        <h2 class="h2 text-[34px] sm:text-[44px] md:text-[52px]">
+          <span class="i18n-en">Try Starter free.<br/><span class="accent">The end of post-and-pray.</span></span>
+          <span class="i18n-ru">Стартер — бесплатно.<br/><span class="accent">Конец публикациям наугад.</span></span>
+        </h2>
+      </div>
+      <div class="col-span-12 lg:col-span-6 lg:pt-6 reveal" data-delay="1">
+        <p class="text-[15.5px] text-[var(--fg-muted)] leading-[1.65] max-w-[480px]">
+          <span class="i18n-en">After the no-card trial, your account drops to a free plan. Upgrade only when you feel Alma has earned its keep in your workflow.</span>
+          <span class="i18n-ru">После триала без карты аккаунт переходит на бесплатный план. Апгрейдь только когда Alma реально станет частью твоего рабочего дня.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 items-start">
+      <div class="card-hl glow-card lift p-8 reveal">
+        <div class="eyebrow !text-[10px] mb-5"><span class="i18n-en">Starter</span><span class="i18n-ru">Старт</span></div>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="text-[42px] font-medium font-mono tnum tracking-tight">800&nbsp;₽</span>
+          <span class="text-[13px] text-[var(--fg-subtle)]"><span class="i18n-en">/mo</span><span class="i18n-ru">/мес</span></span>
+        </div>
+        <p class="text-[13.5px] text-[var(--fg-subtle)] mb-7">
+          <span class="i18n-en">If you're trying to show up consistently with ideas worth posting.</span>
+          <span class="i18n-ru">Чтобы стабильно выкладывать и публиковать только то, что стоит публиковать.</span>
+        </p>
+        <a href="signin.html?mode=signup&next=checkout&plan=starter" class="btn btn-ghost w-full justify-center mb-7">
+          <span class="i18n-en">Choose Starter</span><span class="i18n-ru">Выбрать Старт</span>
+        </a>
+        <ul class="space-y-3 text-[13.5px] text-[var(--fg-muted)]">
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en"><b>25,000 AI tokens / day</b> — ~50 chats or 10 deep research runs</span>
+            <span class="i18n-ru"><b>25 000 AI-токенов в день</b> — ~50 ответов или 10 глубоких research</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Daily ready-to-write ideas from outliers in your niche</span>
+            <span class="i18n-ru">Ежедневные готовые идеи из аутлайеров твоей ниши</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Pre-built expert prompts</span>
+            <span class="i18n-ru">Готовые экспертные промпты</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Build your voice to validate ideas under it</span>
+            <span class="i18n-ru">Собери голос — идеи валидируются под него</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Track 5 creators on your watchlist</span>
+            <span class="i18n-ru">Watchlist — 5 криэйторов</span>
+          </span></li>
+        </ul>
+      </div>
+
+      <div class="price-featured rounded-[10px] p-8 reveal relative md:-mt-3" data-delay="1">
+        <div class="absolute -top-2.5 left-8 px-2 py-0.5 rounded-full bg-[#FAFAFA] text-[var(--green)] text-[10px] font-medium tracking-wider uppercase font-mono">
+          <span class="i18n-en">Most creators choose this</span><span class="i18n-ru">Чаще всего берут</span>
+        </div>
+        <div class="text-[11px] uppercase tracking-[0.14em] text-white/70 font-mono font-medium mb-5">Pro</div>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="text-[42px] font-medium font-mono tnum tracking-tight">1&nbsp;500&nbsp;₽</span>
+          <span class="text-[13px] text-white/65"><span class="i18n-en">/mo</span><span class="i18n-ru">/мес</span></span>
+        </div>
+        <p class="text-[13.5px] text-white/70 mb-7">
+          <span class="i18n-en">If every post needs to perform.</span>
+          <span class="i18n-ru">Когда каждый пост обязан выстреливать.</span>
+        </p>
+        <a href="signin.html?mode=signup&next=checkout&plan=pro" class="btn btn-primary w-full justify-center mb-7 magnetic">
+          <span class="i18n-en">Start 7-day free trial</span><span class="i18n-ru">7 дней бесплатно</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+        <ul class="space-y-3 text-[13.5px] text-white/85">
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-white/75 mt-0.5"></i><span>
+            <span class="i18n-en"><b>100,000 AI tokens / day</b> — ~250 chats or 40 deep research</span>
+            <span class="i18n-ru"><b>100 000 AI-токенов в день</b> — ~250 ответов или 40 research</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-white/75 mt-0.5"></i><span>
+            <span class="i18n-en">Everything in Starter, plus</span><span class="i18n-ru">Всё из Старта, плюс</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-white/75 mt-0.5"></i><span>
+            <span class="i18n-en">3 custom voices for brands, clients or topics</span>
+            <span class="i18n-ru">3 кастом-голоса под бренды, клиентов или темы</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-white/75 mt-0.5"></i><span>
+            <span class="i18n-en">Track 25 creators across platforms</span>
+            <span class="i18n-ru">25 криэйторов — кросс-платформенно</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-white/75 mt-0.5"></i><span>
+            <span class="i18n-en">Most-liked, most-viewed, outlier filters</span>
+            <span class="i18n-ru">Фильтры по лайкам, просмотрам, outlier-множителю</span>
+          </span></li>
+        </ul>
+      </div>
+
+      <div class="card-hl glow-card lift p-8 reveal" data-delay="2">
+        <div class="eyebrow !text-[10px] mb-5"><span class="i18n-en">Studio</span><span class="i18n-ru">Студия</span></div>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="text-[42px] font-medium font-mono tnum tracking-tight">3&nbsp;500&nbsp;₽</span>
+          <span class="text-[13px] text-[var(--fg-subtle)]"><span class="i18n-en">/mo</span><span class="i18n-ru">/мес</span></span>
+        </div>
+        <p class="text-[13.5px] text-[var(--fg-subtle)] mb-7">
+          <span class="i18n-en">If your team runs content at scale.</span>
+          <span class="i18n-ru">Когда команда делает контент в потоке.</span>
+        </p>
+        <a href="signin.html?mode=signup&next=checkout&plan=studio" class="btn btn-ghost w-full justify-center mb-7">
+          <span class="i18n-en">Choose Studio</span><span class="i18n-ru">Выбрать Студию</span>
+        </a>
+        <ul class="space-y-3 text-[13.5px] text-[var(--fg-muted)]">
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en"><b>400,000 AI tokens / day</b> — shared across the team</span>
+            <span class="i18n-ru"><b>400 000 AI-токенов в день</b> — общий пул на команду</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Everything in Pro, plus</span><span class="i18n-ru">Всё из Pro, плюс</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">20 custom voices across team's clients and brands</span>
+            <span class="i18n-ru">20 кастом-голосов на всех клиентов команды</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Shared workspaces and team boards</span>
+            <span class="i18n-ru">Общие воркспейсы и доски команды</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Track 60 creators across the team</span>
+            <span class="i18n-ru">60 криэйторов на всю команду</span>
+          </span></li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--green)] mt-0.5"></i><span>
+            <span class="i18n-en">Priority support for the team</span>
+            <span class="i18n-ru">Приоритетная поддержка для команды</span>
+          </span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="mt-10 text-center text-[12.5px] text-[var(--fg-subtle)] reveal">
+      <span class="i18n-en">Add team members for <b class="text-[var(--ink)]">1,200 ₽/month per seat</b> on any tier, prorated to the day.</span>
+      <span class="i18n-ru">Дополнительные участники команды — <b class="text-[var(--ink)]">1 200 ₽/мес за место</b> на любом тарифе, пересчёт по дням.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="py-28 md:py-40 hr-t relative overflow-hidden">
+  <!-- organic glow backdrop -->
+  <div class="absolute inset-0 -z-[1] pointer-events-none" aria-hidden="true">
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[420px] rounded-full" style="background:radial-gradient(60% 60% at 50% 50%, rgba(45,158,110,0.14), transparent 70%); filter: blur(40px);"></div>
+  </div>
+  <div class="max-w-[900px] mx-auto px-6 lg:px-10 text-center reveal relative">
+    <h2 class="display text-[40px] sm:text-[52px] md:text-[66px] leading-[1.05]">
+      <span class="i18n-en">AI made everyone<br/>sound the same.<br/><span class="shimmer">Alma makes you unmistakably you.</span></span>
+      <span class="i18n-ru">AI сделал так,<br/>что все звучат одинаково.<br/><span class="shimmer">Alma — это голос, который ни с кем не спутать.</span></span>
+    </h2>
+    <p class="mt-8 text-[14.5px] text-[var(--fg-muted)] max-w-[480px] mx-auto leading-[1.6]">
+      <span class="i18n-en">Free for 7 days. No card. Downgrades to a free boards plan if you don't upgrade.</span>
+      <span class="i18n-ru">7 дней бесплатно. Без карты. Если не апгрейднешься — аккаунт переедет на бесплатный план с досками.</span>
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-3">
+      <a href="signin.html?mode=signup" class="btn btn-primary magnetic">
+        <span class="i18n-en">Get started</span><span class="i18n-ru">Начать</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+      <a href="#how" class="btn btn-text">Watch demo</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer id="help" class="hr-t py-16">
+  <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+    <div class="grid grid-cols-12 gap-8 mb-12">
+      <div class="col-span-12 md:col-span-5">
+        <a href="#" class="flex items-center gap-2 mb-4">
+          <svg class="alma-logo" width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Alma">
+            <rect width="32" height="32" rx="7.5" fill="#15583E"/>
+            <path d="M9 22.5 L16 9 L23 22.5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11.7 17.3 L20.3 17.3" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M19.5 22.3 L20.15 20.75 L21.7 20.1 L20.15 19.45 L19.5 17.9 L18.85 19.45 L17.3 20.1 L18.85 20.75 Z" fill="#FFFFFF"/>
+          </svg>
+          <span class="font-medium text-[14.5px] tracking-tight text-[var(--ink)]">Alma</span>
+        </a>
+        <p class="text-[13px] text-[var(--fg-subtle)] max-w-[280px] leading-[1.6]">
+          A research studio for creators, solopreneurs and marketers.
+        </p>
+        <div class="flex items-center gap-2 mt-6">
+          <a href="#" aria-label="X" class="w-8 h-8 grid place-items-center rounded-md border border-[var(--border)] hover:border-[var(--green)] hover:text-[var(--green)] text-[var(--fg-muted)] transition"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
+          <a href="#" aria-label="Instagram" class="w-8 h-8 grid place-items-center rounded-md border border-[var(--border)] hover:border-[var(--green)] hover:text-[var(--green)] text-[var(--fg-muted)] transition"><i data-lucide="instagram" class="w-3.5 h-3.5"></i></a>
+          <a href="#" aria-label="YouTube" class="w-8 h-8 grid place-items-center rounded-md border border-[var(--border)] hover:border-[var(--green)] hover:text-[var(--green)] text-[var(--fg-muted)] transition"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
+        </div>
+      </div>
+
+      <div class="col-span-6 md:col-span-2">
+        <div class="eyebrow mb-4">Product</div>
+        <ul class="space-y-2.5 text-[13.5px]">
+          <li><a href="#study" class="link">Study</a></li>
+          <li><a href="#features" class="link">Studio</a></li>
+          <li><a href="#how" class="link">Method</a></li>
+          <li><a href="#pricing" class="link">Pricing</a></li>
+        </ul>
+      </div>
+
+      <div class="col-span-6 md:col-span-2">
+        <div class="eyebrow mb-4">Compare</div>
+        <ul class="space-y-2.5 text-[13.5px]">
+          <li><a href="#" class="link">vs. Notion</a></li>
+          <li><a href="#" class="link">vs. Jasper</a></li>
+          <li><a href="#" class="link">vs. Copy.ai</a></li>
+          <li><a href="#" class="link">vs. Taplio</a></li>
+        </ul>
+      </div>
+
+      <div class="col-span-12 md:col-span-3">
+        <div class="eyebrow mb-4">Company</div>
+        <ul class="space-y-2.5 text-[13.5px]">
+          <li><a href="#" class="link">Help center</a></li>
+          <li><a href="#" class="link">Affiliates</a></li>
+          <li><a href="#" class="link">Privacy</a></li>
+          <li><a href="#" class="link">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pt-8 border-t border-[var(--border)] text-[12px] text-[var(--fg-faint)] font-mono">
+      <span>© 2026 Alma Labs, Inc.</span>
+      <span>Made for creators who'd rather study than guess.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  lucide.createIcons();
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Mobile menu */
+  const hamburger = document.getElementById('hamburger');
+  const closeMenu = document.getElementById('closeMenu');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => mobileMenu.classList.add('open'));
+  closeMenu.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+  /* Reveal on scroll + trigger SVG draw + count-up */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  /* Count-up numbers */
+  function animateCount(el) {
+    const raw = el.dataset.count;
+    const target = parseFloat(raw);
+    const suffix = el.dataset.suffix || '';
+    const decimals = (raw.split('.')[1] || '').length;
+    if (reduceMotion) {
+      el.textContent = (decimals ? target.toFixed(decimals) : target.toLocaleString('en-US')) + suffix;
+      return;
+    }
+    const dur = 1500; const start = performance.now();
+    function tick(now) {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = target * eased;
+      el.textContent = (decimals ? val.toFixed(decimals) : Math.round(val).toLocaleString('en-US')) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = (decimals ? target.toFixed(decimals) : target.toLocaleString('en-US')) + suffix;
+    }
+    requestAnimationFrame(tick);
+  }
+  const countIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { animateCount(e.target); countIO.unobserve(e.target); }
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('[data-count]').forEach((el) => countIO.observe(el));
+
+  /* SVG contour draw */
+  const contour = document.getElementById('contourSvg');
+  if (contour) {
+    const drawIO = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('drawn'); drawIO.unobserve(e.target); } });
+    }, { threshold: 0.25 });
+    drawIO.observe(contour);
+  }
+
+  /* Scroll progress */
+  const progress = document.getElementById('scrollProgress');
+  function onScroll() {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    progress.style.width = Math.min(100, Math.max(0, pct)) + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if (!reduceMotion) {
+    /* Mouse spotlight */
+    window.addEventListener('pointermove', (e) => {
+      document.body.style.setProperty('--mx', e.clientX + 'px');
+      document.body.style.setProperty('--my', e.clientY + 'px');
+    }, { passive: true });
+
+    /* Magnetic buttons */
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('pointermove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width / 2;
+        const y = e.clientY - r.top - r.height / 2;
+        btn.style.transform = `translate(${x * 0.22}px, ${y * 0.32}px)`;
+      });
+      btn.addEventListener('pointerleave', () => { btn.style.transform = ''; });
+    });
+
+    /* Card glow follow */
+    document.querySelectorAll('.glow-card').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+      });
+    });
+
+    /* Hero window subtle 3D tilt */
+    const tiltWrap = document.getElementById('tiltWrap');
+    const tiltCard = document.getElementById('tiltCard');
+    if (tiltWrap && tiltCard) {
+      tiltCard.style.transition = 'transform .3s var(--ease)';
+      tiltWrap.addEventListener('pointermove', (e) => {
+        const r = tiltWrap.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        tiltCard.style.transform = `perspective(900px) rotateY(${px * 7}deg) rotateX(${-py * 7}deg)`;
+      });
+      tiltWrap.addEventListener('pointerleave', () => { tiltCard.style.transform = ''; });
+    }
+
+    /* Parallax */
+    const parallaxEls = [...document.querySelectorAll('[data-parallax]')];
+    if (parallaxEls.length) {
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (ticking) return; ticking = true;
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          parallaxEls.forEach((el) => {
+            const s = parseFloat(el.dataset.parallax);
+            el.style.transform = `translateY(${y * s}px)`;
+          });
+          ticking = false;
+        });
+      }, { passive: true });
+    }
+  }
+</script>
+</body>
+</html>

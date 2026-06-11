@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alma — Cookies & Storage Policy</title>
+<meta name="description" content="What browser storage Alma uses, and what we don't use." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#FAFAFA; --surface:#FFFFFF; --ink:#0A0A0A;
+    --fg:#0A0A0A; --fg-muted:rgba(10,10,10,0.62); --fg-subtle:rgba(10,10,10,0.42); --fg-faint:rgba(10,10,10,0.22);
+    --border:rgba(10,10,10,0.08); --border-strong:rgba(10,10,10,0.18);
+    --green:#15583E; --green-dark:#0F4530; --green-soft:#E8F0EA;
+    --serif:'Instrument Serif',ui-serif,Georgia,serif;
+    --sans:'Geist','Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+  html{scroll-behavior:smooth;color-scheme:light;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--fg);letter-spacing:-0.011em;line-height:1.65;}
+  .font-mono{font-family:var(--mono);}
+  .accent{font-family:var(--serif);font-style:italic;color:var(--green);}
+  .eyebrow{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--fg-subtle);font-weight:500;}
+  .prose h2{font-size:22px;font-weight:500;letter-spacing:-0.022em;margin-top:2.5rem;margin-bottom:.75rem;color:var(--ink);}
+  .prose h3{font-size:15px;font-weight:600;margin-top:1.5rem;margin-bottom:.4rem;color:var(--ink);}
+  .prose p{color:var(--fg-muted);margin-bottom:.85rem;}
+  .prose ul{list-style:none;padding:0;margin:0 0 1rem 0;}
+  .prose ul li{position:relative;padding-left:1.1rem;color:var(--fg-muted);margin-bottom:.45rem;}
+  .prose ul li::before{content:'';position:absolute;left:0;top:.65em;width:4px;height:4px;border-radius:50%;background:var(--green);}
+  .prose strong{color:var(--ink);font-weight:600;}
+  .prose code{font-family:var(--mono);font-size:.85em;background:rgba(10,10,10,0.05);padding:.1em .35em;border-radius:4px;color:var(--ink);}
+  .prose a{color:var(--green);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(21,88,62,0.35);}
+  .prose a:hover{text-decoration-color:var(--green);}
+  ::selection{background:var(--green);color:#FAFAFA;}
+  .toc a{color:var(--fg-muted);transition:color .2s;}
+  .toc a:hover{color:var(--green);}
+  .noise::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+  /* Storage-keys table */
+  .keys-table{width:100%;border-collapse:collapse;font-size:13px;margin:1rem 0;}
+  .keys-table th,.keys-table td{padding:.65rem .75rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  .keys-table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg-subtle);font-weight:500;}
+  .keys-table td:first-child{font-family:var(--mono);font-size:12px;color:var(--ink);white-space:nowrap;}
+  .keys-table td:nth-child(2){color:var(--fg-muted);}
+  .keys-table tr:last-child td{border-bottom:0;}
+  .reset-btn{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.55rem .9rem;border-radius:7px;font-size:13px;font-weight:500;
+    background:var(--ink);color:#FAFAFA;border:0;cursor:pointer;
+    transition:background-color .2s;
+  }
+  .reset-btn:hover{background:#1c1c1c;}
+  .reset-btn.done{background:var(--green);}
+</style>
+</head>
+<body class="noise">
+
+<header class="px-6 lg:px-10 h-14 border-b border-[var(--border)] flex items-center bg-[#FAFAFA]/85 backdrop-blur-xl sticky top-0 z-30">
+  <div class="max-w-[1100px] mx-auto w-full flex items-center justify-between">
+    <a href="/eden-clone.html" class="flex items-center gap-2">
+      <svg class="alma-logo" width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Alma">
+        <rect width="32" height="32" rx="7.5" fill="#15583E"/>
+        <path d="M9 22.5 L16 9 L23 22.5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M11.7 17.3 L20.3 17.3" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M19.5 22.3 L20.15 20.75 L21.7 20.1 L20.15 19.45 L19.5 17.9 L18.85 19.45 L17.3 20.1 L18.85 20.75 Z" fill="#FFFFFF"/>
+      </svg>
+      <span class="font-medium text-[14.5px] tracking-tight text-[var(--ink)]">Alma</span>
+    </a>
+    <div class="flex items-center gap-5 text-[13px]">
+      <a href="/privacy.html" class="text-[var(--fg-muted)] hover:text-[var(--green)] transition">Privacy</a>
+      <a href="/terms.html" class="text-[var(--fg-muted)] hover:text-[var(--green)] transition">Terms</a>
+      <a href="/eden-clone.html" class="text-[var(--fg-muted)] hover:text-[var(--green)] transition">← Back to Alma</a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[760px] mx-auto px-6 lg:px-10 py-16 md:py-24">
+
+  <div class="mb-12">
+    <div class="eyebrow mb-4">Cookies</div>
+    <h1 class="text-[42px] md:text-[56px] font-medium tracking-[-0.03em] leading-[1.05]">
+      Cookies & <span class="accent">Storage Policy</span>
+    </h1>
+    <p class="mt-4 text-[15px] text-[var(--fg-muted)] font-mono">
+      Effective: June 4, 2026
+    </p>
+  </div>
+
+  <!-- TLDR -->
+  <div class="mb-12 p-5 border border-[var(--border)] rounded-xl bg-[var(--green-soft)]/40">
+    <div class="eyebrow mb-2">The short version</div>
+    <p class="text-[14.5px] text-[var(--fg)] leading-[1.6] m-0">
+      Alma uses <strong>only essential browser storage</strong> to keep you signed in and remember your UI preferences.
+      <strong>No third-party cookies. No advertising or behavioural-tracking pixels. No analytics by default.</strong>
+      You can clear it any time from your browser or with the button at the bottom of this page.
+    </p>
+  </div>
+
+  <nav class="toc mb-12 text-[13.5px] grid sm:grid-cols-2 gap-y-1.5 gap-x-6">
+    <a href="#what">1. What "cookies" mean here</a>
+    <a href="#use">2. What we use</a>
+    <a href="#not-use">3. What we don't use</a>
+    <a href="#thirdparty">4. Third-party services</a>
+    <a href="#optout">5. How to opt out</a>
+    <a href="#changes">6. Changes</a>
+    <a href="#reset">7. Reset your choice</a>
+  </nav>
+
+  <div class="prose">
+
+    <h2 id="what">1. What "cookies" mean on Alma</h2>
+    <p>
+      Strictly speaking, Alma does not set any HTTP cookies at the moment. We use <strong>browser localStorage</strong>
+      instead — small pieces of data kept in your own browser, never transmitted automatically with every request the way
+      cookies are. They serve the same purpose (remembering your session and preferences) but are scoped to this site and
+      easier for you to control.
+    </p>
+    <p>
+      We use the word "cookies" in this policy as a familiar umbrella term covering localStorage, sessionStorage, and any
+      future use of actual HTTP cookies.
+    </p>
+
+    <h2 id="use">2. What we use (all essential)</h2>
+    <p>Everything Alma stores in your browser is strictly necessary to deliver the service. Nothing here is used for tracking.</p>
+
+    <table class="keys-table">
+      <thead><tr><th>Key</th><th>What it stores</th><th>Lifetime</th></tr></thead>
+      <tbody>
+        <tr><td>eden.token</td>           <td>Your signed-in session token (JWT). Required to call the API.</td><td>30 days</td></tr>
+        <tr><td>eden.user</td>            <td>Cached profile (email, nickname) so the UI loads instantly.</td><td>Until sign-out</td></tr>
+        <tr><td>eden.engine, eden.model, eden.url, eden.key</td><td>AI engine you've configured (Ollama / OpenAI-compatible / cloud).</td><td>Until cleared</td></tr>
+        <tr><td>eden.search, eden.smart</td><td>Toggles for web-research and smart-mode.</td><td>Until cleared</td></tr>
+        <tr><td>eden.ctx</td>             <td>Your project context: niche, platform, goal — so the AI remembers between sessions.</td><td>Until cleared</td></tr>
+        <tr><td>eden.voice, eden.voices</td><td>Voice-profile fingerprints you trained on your own posts.</td><td>Until cleared</td></tr>
+        <tr><td>eden.drafts</td>          <td>Drafts you saved in the Drafts panel (your own writing).</td><td>Until you delete them</td></tr>
+        <tr><td>eden.plans</td>           <td>Planner events you scheduled.</td><td>Until you delete them</td></tr>
+        <tr><td>eden.creators</td>        <td>Creators watchlist you built.</td><td>Until you delete them</td></tr>
+        <tr><td>eden.onboarded</td>       <td>Flag remembering you've completed the onboarding wizard.</td><td>Until cleared</td></tr>
+        <tr><td>eden.adminPin, eden.adminUnlocked</td><td>Admin-panel PIN (for the admin page only).</td><td>Until cleared / session</td></tr>
+        <tr><td>alma.cookie_consent</td>  <td>Your answer to the cookie banner so we don't ask again.</td><td>Until cleared</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      None of these values are read by third parties. They never leave your browser except <code>eden.token</code>, which is
+      sent in the <code>Authorization</code> header to our own backend on each API call (that's how we know it's you).
+    </p>
+
+    <h2 id="not-use">3. What we don't use</h2>
+    <ul>
+      <li><strong>No third-party cookies.</strong></li>
+      <li><strong>No advertising cookies</strong> (no Facebook Pixel, no Google Ads, no retargeting tags).</li>
+      <li><strong>No analytics by default</strong> (no Google Analytics, no Mixpanel, no Hotjar). If we ever add privacy-friendly analytics, we'll update this page and re-prompt you for consent.</li>
+      <li><strong>No browser fingerprinting</strong> or canvas-tracking tricks.</li>
+      <li><strong>No persistent cross-site identifiers.</strong></li>
+    </ul>
+
+    <h2 id="thirdparty">4. Third-party services that may set their own storage</h2>
+    <p>
+      A few external scripts and embeds run on Alma. They are served from their own origins and may set their own storage
+      under <em>their</em> domain, governed by their own policies:
+    </p>
+    <ul>
+      <li><strong>Tailwind CDN</strong> (<code>cdn.tailwindcss.com</code>) — serves the CSS framework. Does not set tracking cookies.</li>
+      <li><strong>Google Fonts</strong> (<code>fonts.googleapis.com</code>, <code>fonts.gstatic.com</code>) — loads the Geist and Instrument Serif fonts.</li>
+      <li><strong>Lucide icons CDN</strong> (<code>unpkg.com</code>) — loads the SVG icon library.</li>
+      <li><strong>AI provider</strong> (depending on configuration: Ollama on our infrastructure, or a cloud API like Groq / OpenAI / Anthropic) — receives the AI requests you send. See our <a href="/privacy.html#ai">Privacy Policy §4</a>.</li>
+    </ul>
+    <p>
+      None of these services receive personal data about you from us beyond what is technically necessary to deliver their
+      asset or process your AI request.
+    </p>
+
+    <h2 id="optout">5. How to opt out</h2>
+    <p>
+      You have full control over Alma's browser storage:
+    </p>
+    <ul>
+      <li><strong>Browser settings:</strong> open your browser's site settings for this domain and clear cookies / site data. You'll be signed out.</li>
+      <li><strong>Incognito / private mode:</strong> nothing persists after you close the window.</li>
+      <li><strong>Reset button</strong> at the bottom of this page — clears everything we wrote, immediately.</li>
+    </ul>
+    <p>
+      <strong>Heads-up:</strong> the items in section 2 are <em>essential</em>. If you block or clear them, you'll be signed
+      out and your in-browser drafts, plans, voice profiles, etc. will be lost. Anything saved server-side (boards, account)
+      stays — sign back in to access it.
+    </p>
+
+    <h2 id="changes">6. Changes to this policy</h2>
+    <p>
+      If we ever add analytics, third-party widgets, or any optional storage, we will:
+    </p>
+    <ul>
+      <li>Update this page and bump the "Effective" date.</li>
+      <li>Re-show the consent banner so you can choose again.</li>
+      <li>Make optional categories truly optional — declining will not break the product.</li>
+    </ul>
+
+    <h2 id="reset">7. Reset your cookie choice</h2>
+    <p>
+      Clears <strong>everything Alma stored in this browser</strong>: session, preferences, drafts, plans, your consent record.
+      Server-side data (account, boards, subscription) is not affected.
+    </p>
+    <button type="button" id="almaResetBtn" class="reset-btn">
+      Clear all of Alma's storage in this browser
+    </button>
+
+  </div>
+
+  <div class="mt-20 pt-8 border-t border-[var(--border)] flex flex-wrap items-center gap-4 text-[12.5px] text-[var(--fg-subtle)] font-mono">
+    <a href="/eden-clone.html" class="hover:text-[var(--green)] transition">← Back to home</a>
+    <span class="text-[var(--fg-faint)]">·</span>
+    <a href="/privacy.html" class="hover:text-[var(--green)] transition">Privacy</a>
+    <span class="text-[var(--fg-faint)]">·</span>
+    <a href="/terms.html" class="hover:text-[var(--green)] transition">Terms</a>
+    <span class="ml-auto">© 2026 Alma Labs, Inc.</span>
+  </div>
+
+</main>
+
+<script>
+  document.getElementById('almaResetBtn').addEventListener('click', function () {
+    try {
+      // Clear every key Alma uses in this browser
+      Object.keys(localStorage).filter(k => k.startsWith('eden.') || k.startsWith('alma.'))
+        .forEach(k => localStorage.removeItem(k));
+      Object.keys(sessionStorage).filter(k => k.startsWith('eden.') || k.startsWith('alma.'))
+        .forEach(k => sessionStorage.removeItem(k));
+    } catch {}
+    this.textContent = '✓ Cleared. You\'re signed out everywhere.';
+    this.classList.add('done');
+    this.disabled = true;
+  });
+</script>
+</body>
+</html>
